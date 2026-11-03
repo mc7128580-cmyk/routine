@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Routine</title>
+<!-- Firebase (login + cloud database) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =====================================================
+   DESIGN: modern minimal. Neutral surfaces, one ink colour,
+   green = done, red = couldn't. Day and night themes.
+   ===================================================== */
+:root {
+  --bg: #F6F6F3; --surface: #FFFFFF; --soft: #EFEFEB; --ink: #121212; --muted: #85857F; --line: #E4E3DE;
+  --go: #1F9D5C; --stop: #E0483E; --warm: #E8A13A;
+  --lime: var(--go); --orange: var(--stop); --violet: var(--ink); --amber: var(--warm); --on-accent: #FFFFFF;
+  --shadow: 0 1px 2px rgba(18,18,18,.04), 0 8px 24px -12px rgba(18,18,18,.12);
+  --sans: "Geist", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Geist Mono", ui-monospace, Consolas, monospace;
+  --head: var(--sans); --serif: var(--sans);
+  --r: 16px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E0E0F; --surface: #171719; --soft: #1F1F22; --ink: #F1F1EE; --muted: #8B8B86; --line: #2A2A2E;
+    --go: #34C17A; --stop: #F0645A; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E0E0F; --surface: #171719; --soft: #1F1F22; --ink: #F1F1EE; --muted: #8B8B86; --line: #2A2A2E;
+  --go: #34C17A; --stop: #F0645A; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+html { transition: background-color .4s; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--sans); padding-top: env(safe-area-inset-top, 0px); overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; transition: background-color .4s, color .4s; }
+main { max-width: 42rem; margin: 0 auto; padding: 0 1.1rem 7.5rem; }
+.mono { font-family: var(--mono); font-size: .78rem; letter-spacing: 0; }
+em { font-style: normal; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+/* ---------- top bar ---------- */
+.hud { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  max-width: 42rem; margin: 0 auto; padding: .9rem 1.1rem; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px);
+  box-shadow: 0 0 0 100vmax color-mix(in srgb, var(--bg) 86%, transparent); clip-path: inset(0 -100vmax); color: var(--muted); }
+.hudL { display: flex; align-items: center; gap: .6rem; }
+.brand { font: 600 1rem var(--sans); color: var(--ink); letter-spacing: -.01em; }
+.rec { width: 7px; height: 7px; border-radius: 50%; background: var(--go); display: inline-block; font-size: 0; }
+.hudR { display: flex; align-items: center; gap: .6rem; }
+.lvl { font: 500 .8rem var(--mono); color: var(--muted); padding: .3rem .6rem; border: 1px solid var(--line); border-radius: 99px; }
+.themeBtn { width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  display: grid; place-items: center; font-size: .95rem; transition: transform .4s cubic-bezier(.3,1.4,.5,1); }
+.themeBtn:hover { transform: rotate(-25deg); }
+
+/* ---------- hero ---------- */
+.marquee, .c3, .c4 { display: none !important; }
+.hero { background: var(--surface); border-radius: var(--r); padding: 1.5rem 1.4rem 1.3rem; margin-top: .6rem; box-shadow: var(--shadow); border: 1px solid var(--line); position: relative; }
+.hello { margin: 0; color: var(--muted); font-size: .95rem; }
+.hello b { color: var(--ink); font-weight: 500; }
+.bal { display: flex; align-items: baseline; gap: .55rem; margin: .5rem 0 1.1rem; }
+.big { font: 600 clamp(3.8rem, 17vw, 5.5rem)/1 var(--sans); letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.bal em { color: var(--muted); font-size: 1rem; }
+.hero.neg .big { color: var(--stop); }
+.hero.cut { animation: ring .7s ease; }
+@keyframes ring { 30% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--go) 30%, transparent), var(--shadow); } }
+.segs { display: flex; gap: 3px; height: 6px; }
+.segs span { flex: 1; border-radius: 99px; background: var(--soft); transition: background .35s; }
+.segs span.on { background: var(--go); }
+.segs span.x { background: var(--stop); }
+.status { margin: .75rem 0 0; color: var(--muted); font: 400 .85rem var(--sans); }
+.heroRow { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: 1rem; }
+.streakTag { margin: 0; font-size: .82rem; padding: .35rem .75rem; border-radius: 99px; display: inline-flex; gap: .35rem; align-items: center; }
+.streakTag.lit { background: color-mix(in srgb, var(--warm) 16%, transparent); color: var(--ink); }
+.streakTag.off { color: var(--muted); background: var(--soft); }
+.streakTag.lit .fl { display: inline-block; animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.15); } }
+.split span { display: inline-block; animation: rise .5s cubic-bezier(.2,.9,.3,1) both; animation-delay: calc(var(--i) * 25ms); }
+@keyframes rise { from { transform: translateY(.35em); opacity: 0; } }
+
+/* ---------- buttons ---------- */
+.btn { font: 500 1rem var(--sans); background: var(--ink); color: var(--bg); border: 0; border-radius: 12px; padding: .9rem 1rem; cursor: pointer;
+  transition: transform .15s, opacity .15s; }
+.btn:hover { opacity: .88; }
+.btn:active { transform: scale(.98); }
+.btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost:hover { opacity: 1; border-color: var(--muted); }
+.btn.warn { color: var(--stop); }
+.btn.small { padding: .35rem .75rem; font-size: .82rem; border-radius: 99px; }
+.btn.wide { width: 100%; margin-top: 1rem; }
+.row { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+/* ---------- day strip ---------- */
+.stripWrap { display: flex; gap: .5rem; margin-top: 1.8rem; }
+.strip { flex: 1; display: flex; gap: .4rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 4px 6px 0; scrollbar-width: none; }
+.strip::-webkit-scrollbar { display: none; }
+.dayBtn { flex: none; scroll-snap-align: start; width: 3.6rem; padding: .55rem 0; border-radius: 14px; cursor: pointer; position: relative;
+  background: transparent; border: 1px solid transparent; color: var(--ink); display: grid; justify-items: center; gap: .1rem; transition: background .2s, color .2s, border-color .2s; }
+.dayBtn:hover { background: var(--surface); border-color: var(--line); }
+.dayBtn .wd { font-size: .68rem; color: var(--muted); }
+.dayBtn .dn { font: 600 1.2rem/1.2 var(--sans); font-variant-numeric: tabular-nums; }
+.dayBtn.today .dn { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.dayBtn.past { color: var(--muted); }
+.dayBtn.sel { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.dayBtn.sel .wd { color: color-mix(in srgb, var(--bg) 70%, transparent); }
+.dayBtn .dot { position: absolute; top: 4px; right: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--warm); font-size: 0; padding: 0; min-width: 0; }
+.jump { flex: none; position: relative; width: 3.2rem; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; font-size: 1.1rem; }
+.jump input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.jump input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; }
+
+/* ---------- headings ---------- */
+h2 { display: flex; align-items: baseline; gap: .6rem; margin: 2.4rem 0 .9rem; font: 600 1.6rem/1.1 var(--sans); letter-spacing: -.03em; }
+h2 em { font-size: .85rem; color: var(--muted); font-weight: 400; letter-spacing: 0; }
+#dayTitle { margin-top: 1.4rem; font-size: 2rem; }
+.sec { display: flex; justify-content: space-between; margin: 1.6rem 0 .5rem; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; font-family: var(--sans); font-weight: 500; }
+#dayTitle + .sec { margin-top: .4rem; }
+#sections .sec:first-child { margin-top: 1.6rem; }
+.dayNote { color: var(--muted); margin: .8rem 0 0; font-size: .85rem; }
+.dayNote:empty { display: none; }
+
+/* ---------- lists ---------- */
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+.item { display: flex; align-items: center; position: relative; border-top: 1px solid var(--line); transition: background .25s; }
+.item:first-child { border-top: 0; }
+.item .grip { width: 1.3rem; flex: none; display: grid; place-items: center; color: var(--muted); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; font-size: .8rem; }
+.item.dragging { background: var(--soft); }
+.item .info { flex: 1; min-width: 0; padding: .9rem .4rem; display: grid; gap: .1rem .7rem; grid-template-columns: auto 1fr; grid-template-areas: "t st" "who who"; }
+.item .t { grid-area: t; font: 500 .78rem var(--mono); color: var(--muted); white-space: nowrap; }
+.item .t.none { display: none; }
+.item .st { grid-area: st; justify-self: start; }
+.item .who { grid-area: who; min-width: 0; }
+.item .nm { font-size: 1.05rem; font-weight: 500; letter-spacing: -.01em; overflow-wrap: anywhere; transition: color .25s; }
+.item.done .nm { color: var(--muted); }
+.item.failed .nm { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--stop); }
+.item .fire { margin-left: .4rem; font-size: .8rem; color: var(--warm); }
+.item .bell { margin-left: .4rem; font-size: .75rem; color: var(--muted); white-space: nowrap; }
+.item .meta { display: block; font-size: .78rem; color: var(--muted); }
+.st { font-size: .68rem; font-weight: 500; letter-spacing: .04em; padding: .12rem .5rem; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
+.st.done { background: color-mix(in srgb, var(--go) 14%, transparent); color: var(--go); }
+.st.fail { background: color-mix(in srgb, var(--stop) 13%, transparent); color: var(--stop); }
+.st.late { color: var(--warm); background: color-mix(in srgb, var(--warm) 14%, transparent); }
+.st.plan { background: var(--soft); color: var(--ink); }
+.st.flip { animation: fadeUp .35s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(3px); } }
+.acts { display: flex; align-items: center; gap: .4rem; padding: 0 .3rem; }
+.ib { flex: none; background: none; border: 0; color: var(--muted); width: 2rem; height: 2rem; border-radius: 8px; font-size: .95rem; cursor: pointer; }
+.ib:hover { color: var(--ink); background: var(--soft); }
+.yes, .no { flex: none; width: 2.6rem; height: 2.6rem; border-radius: 50%; cursor: pointer; display: grid; place-items: center; font: 600 1rem var(--sans);
+  background: transparent; border: 1.5px solid var(--line); color: var(--muted); transition: transform .2s cubic-bezier(.3,1.5,.5,1), background .2s, border-color .2s, color .2s; }
+.yes:hover { border-color: var(--go); color: var(--go); }
+.no:hover { border-color: var(--stop); color: var(--stop); }
+.yes:active, .no:active { transform: scale(.9); }
+.yes[aria-pressed="true"] { background: var(--go); border-color: var(--go); color: #fff; animation: popIn .35s cubic-bezier(.3,1.6,.5,1); }
+.no[aria-pressed="true"] { background: var(--stop); border-color: var(--stop); color: #fff; animation: popIn .35s cubic-bezier(.3,1.6,.5,1); }
+@keyframes popIn { 0% { transform: scale(.7); } }
+.item .edit { margin-right: .3rem; }
+.item.pop { animation: rowPop .4s ease; }
+@keyframes rowPop { 40% { background: var(--soft); } }
+.item.new { animation: rowNew 1.8s ease; }
+@keyframes rowNew { 0%, 35% { background: color-mix(in srgb, var(--warm) 18%, var(--surface)); } }
+@media (hover: hover) {
+  .item .grip, .item .edit { opacity: 0; transition: opacity .2s; }
+  .item:hover .grip, .item:hover .edit, .item:focus-within .edit { opacity: 1; }
+}
+.empty { color: var(--muted); padding: 1.1rem 1.2rem; margin: 0; font-size: .9rem; }
+.offList { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-top: 1rem; color: var(--muted); font-size: .82rem; }
+.chip { font: 400 .82rem var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: .3rem .75rem; cursor: pointer; }
+.chip:hover { border-color: var(--muted); }
+.addRow { display: grid; grid-template-columns: 2fr 1fr; gap: .6rem; margin-top: 1.1rem; }
+.addRow .btn { width: 100%; }
+.float { position: fixed; z-index: 50; pointer-events: none; font: 600 1.4rem var(--sans); color: var(--go); animation: floatUp .9s cubic-bezier(.2,.8,.3,1) forwards; }
+.float.minus { color: var(--stop); }
+@keyframes floatUp { to { transform: translateY(-60px); opacity: 0; } }
+
+/* ---------- inputs + journal ---------- */
+label.f, span.f { display: block; color: var(--muted); margin-bottom: .3rem; font-size: .8rem; font-family: var(--sans); }
+input, select, textarea { width: 100%; font: 400 1rem var(--sans); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: .65rem .75rem; transition: border-color .2s, box-shadow .2s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 8%, transparent); }
+textarea { min-height: 5.5rem; line-height: 1.5; resize: vertical; }
+input.shake { animation: shake .35s, redEdge 1.2s; }
+@keyframes redEdge { 0%, 70% { border-color: var(--stop); } }
+.moods { display: flex; gap: .4rem; margin-bottom: .7rem; }
+.moods button { flex: 1; font-size: 1.5rem; padding: .5rem 0; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; filter: grayscale(1); opacity: .6; transition: transform .2s, opacity .2s, filter .2s; }
+.moods button:hover { opacity: 1; }
+.moods button[aria-pressed="true"] { filter: none; opacity: 1; border-color: var(--ink); transform: translateY(-2px); }
+
+/* ---------- profile ---------- */
+.me { padding-top: 1.6rem; }
+.avatar { width: 4.5rem; height: 4.5rem; display: grid; place-items: center; font-size: 2.2rem; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.me h1 { margin: .9rem 0 0; font: 600 clamp(2.4rem, 10vw, 3.4rem)/1 var(--sans); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .6rem; margin-top: 1.4rem; }
+.stats div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.1rem; }
+.stats b { display: block; font: 600 2rem/1 var(--sans); letter-spacing: -.04em; }
+.stats span { color: var(--muted); font-family: var(--sans); font-size: .8rem; }
+.lvlbar { height: 6px; background: var(--soft); margin-top: 1rem; border-radius: 99px; overflow: hidden; }
+.lvlbar i { display: block; height: 100%; background: var(--ink); border-radius: 99px; transition: width .6s; }
+.lvlText { color: var(--muted); margin-top: .45rem; }
+.report { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 1.2rem 1.3rem; }
+.report .pct { font: 600 2.6rem/1 var(--sans); letter-spacing: -.04em; }
+.report .pct em { font-size: .9rem; color: var(--muted); font-weight: 400; margin-left: .4rem; letter-spacing: 0; }
+.report p { margin: .4rem 0 0; } .report .mono { color: var(--muted); }
+.heat { display: flex; gap: 3px; }
+.hcol { flex: 1; display: grid; gap: 3px; }
+.hc { aspect-ratio: 1; border: 0; padding: 0; border-radius: 3px; background: var(--soft); cursor: pointer; }
+.hc.future { background: transparent; cursor: default; }
+.hc.rest { background: transparent; box-shadow: inset 0 0 0 1px var(--warm); }
+.hc.none { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.hc.sel { outline: 2px solid var(--ink); outline-offset: 1px; }
+.heatInfo { margin-top: .7rem; color: var(--muted); min-height: 1.4em; }
+.bars { display: grid; gap: .85rem; }
+.bar .top { display: flex; justify-content: space-between; gap: 1rem; font-size: .95rem; }
+.bar .track { height: 5px; background: var(--soft); margin-top: .35rem; border-radius: 99px; overflow: hidden; }
+.bar .track i { display: block; height: 100%; background: var(--go); border-radius: 99px; }
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: .5rem; }
+.badge { border: 1px solid var(--line); padding: .9rem .5rem; text-align: center; border-radius: 14px; background: var(--surface); }
+.badge .ic { font-size: 1.6rem; display: block; }
+.badge .bn { font-size: .82rem; }
+.badge.got { border-color: var(--ink); }
+.badge:not(.got) { opacity: .35; filter: grayscale(1); }
+.settings { display: grid; gap: 1.1rem; }
+.note { color: var(--muted); font-size: .82rem; margin: .35rem 0 0; }
+.fold { border-top: 1px solid var(--line); margin-top: 1.4rem; }
+.fold summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: .6rem; padding: 1rem 0; font: 600 1.15rem var(--sans); letter-spacing: -.02em; }
+.fold summary::-webkit-details-marker { display: none; }
+.fold summary::after { content: "+"; margin-left: auto; color: var(--muted); transition: transform .3s; font-weight: 400; }
+.fold[open] summary::after { transform: rotate(45deg); }
+.fold summary em { font-size: .85rem; color: var(--muted); font-weight: 400; }
+.fold > :not(summary) { margin-bottom: 1.2rem; }
+.log { list-style: none; padding: 0; margin: 0; }
+.log li { display: grid; grid-template-columns: 3.6rem 1fr auto; gap: .6rem; padding: .55rem 0; border-bottom: 1px solid var(--line); font-size: .9rem; }
+.log .d { color: var(--muted); }
+.log .p { font-weight: 600; font-variant-numeric: tabular-nums; } .log .p.plus { color: var(--go); } .log .p.minus { color: var(--stop); }
+
+/* ---------- nav + overlays ---------- */
+nav { position: fixed; left: 50%; bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; gap: 2px; padding: 4px; z-index: 30;
+  border-radius: 99px; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(14px); border: 1px solid var(--line); box-shadow: var(--shadow); }
+nav a { font: 500 .85rem var(--sans); text-decoration: none; color: var(--muted); padding: .6rem 1.25rem; border-radius: 99px; text-transform: capitalize; transition: background .25s, color .25s; }
+nav a.on { background: var(--ink); color: var(--bg); }
+.wipe { position: fixed; inset: 0; z-index: 60; pointer-events: none; display: grid; }
+.wipe:not(.go) { visibility: hidden; }
+.wipe i { grid-area: 1/1; background: var(--bg); opacity: 0; }
+.wipe i:nth-child(2) { display: none; }
+.wipe.go i { animation: veil .5s ease forwards; }
+@keyframes veil { 45%, 55% { opacity: 1; } 100% { opacity: 0; } }
+.slam { position: fixed; inset: 0; z-index: 70; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); color: var(--ink);
+  display: grid; place-content: center; text-align: center; padding: 2rem; cursor: pointer; animation: fadeIn .3s ease; }
+.slam b { display: block; font: 600 clamp(5rem, 26vw, 9rem)/1 var(--sans); letter-spacing: -.06em; color: var(--stop); animation: rise .5s cubic-bezier(.2,.9,.3,1) both; }
+.slam em { display: block; margin-top: .5rem; font-size: 1.2rem; color: var(--muted); }
+.slam .mono { margin-top: 2rem; color: var(--muted); }
+.slam.shake b { animation: rise .5s cubic-bezier(.2,.9,.3,1) both, shake .4s .5s; }
+@keyframes shake { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+@keyframes fadeIn { from { opacity: 0; } }
+.burst { position: fixed; inset: 0; z-index: 65; pointer-events: none; display: grid; place-content: center; text-align: center;
+  background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(6px); color: var(--ink); animation: burstFade 1.6s ease forwards; }
+.burst b { font: 600 clamp(4rem, 20vw, 7rem)/1 var(--sans); letter-spacing: -.05em; animation: rise .5s cubic-bezier(.2,.9,.3,1) both; }
+.burst em { margin-top: .6rem; font-size: 1.1rem; color: var(--muted); }
+@keyframes burstFade { 0% { opacity: 0; } 12%, 75% { opacity: 1; } 100% { opacity: 0; } }
+.toast { position: fixed; left: 50%; top: calc(4rem + env(safe-area-inset-top, 0px)); z-index: 80; background: var(--ink); color: var(--bg); padding: .75rem 1.15rem; font-size: .9rem;
+  border-radius: 99px; max-width: 90vw; text-align: center; box-shadow: var(--shadow); animation: toast 4s cubic-bezier(.2,1,.3,1) forwards; }
+@keyframes toast { 0% { transform: translate(-50%, -140%); opacity: 0; } 10%, 86% { transform: translate(-50%, 0); opacity: 1; } 100% { transform: translate(-50%, -140%); opacity: 0; } }
+
+/* ---------- sheets ---------- */
+dialog { border: 1px solid var(--line); padding: 0; background: var(--surface); color: var(--ink); width: min(40rem, 100vw); max-width: 100vw; margin: auto auto 0; max-height: 92vh;
+  border-radius: 22px 22px 0 0; box-shadow: 0 30px 60px -20px rgba(0,0,0,.35); }
+dialog::backdrop { background: rgba(10,10,10,.35); backdrop-filter: blur(4px); }
+dialog[open] { animation: sheet .35s cubic-bezier(.2,1,.3,1); }
+@keyframes sheet { from { transform: translateY(40px); opacity: 0; } }
+#dlgForm, #tdlgForm { padding: 1.5rem 1.3rem calc(1.4rem + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem .8rem; }
+#dlgForm .wide, #tdlgForm .wide { grid-column: 1 / -1; }
+#dlgForm h3, #tdlgForm h3 { grid-column: 1 / -1; margin: 0; font: 600 1.5rem var(--sans); letter-spacing: -.03em; }
+.days { display: flex; gap: .35rem; }
+.days button { flex: 1; font: 500 .8rem var(--sans); padding: .6rem 0; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer; border-radius: 10px; transition: background .2s, color .2s; }
+.days button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.remPick button { font-size: .78rem; padding: .7rem .2rem; }
+.dlgBtns { grid-column: 1 / -1; display: flex; gap: .5rem; margin-top: .3rem; }
+.dlgBtns .btn { flex: 1; padding: .8rem .5rem; }
+
+/* ---------- timer ---------- */
+.timer { position: fixed; inset: 0; z-index: 75; background: var(--bg); color: var(--ink); display: grid; place-content: center; justify-items: center; text-align: center; padding: 2rem; animation: fadeIn .3s; }
+.timer .tn { font-size: 1.2rem; color: var(--muted); }
+.timer .clk { font: 300 clamp(5rem, 24vw, 11rem)/1 var(--sans); letter-spacing: -.06em; font-variant-numeric: tabular-nums; margin-top: .5rem; }
+.timer .tb { width: min(28rem, 80vw); height: 4px; background: var(--soft); margin: 2rem 0; border-radius: 99px; overflow: hidden; }
+.timer .tb i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .25s linear; }
+.timer .row { justify-content: center; }
+.timer.fin .clk { color: var(--go); }
+
+/* ---------- profile / account page ---------- */
+.acc { padding-top: 1.4rem; }
+.accHead { display: flex; align-items: center; gap: 1.2rem; }
+.accAva { flex: none; width: 5.5rem; height: 5.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 2.6rem;
+  background: var(--surface) center / cover no-repeat; border: 1px solid var(--line); box-shadow: var(--shadow); overflow: hidden; }
+.accAva.small { width: 3.4rem; height: 3.4rem; font-size: 1.6rem; box-shadow: none; }
+.accWho { min-width: 0; }
+.accWho h1 { margin: 0; font: 600 clamp(1.9rem, 7vw, 2.8rem)/1.05 var(--sans); letter-spacing: -.04em; overflow-wrap: anywhere; }
+.accSub { margin: .35rem 0 0; color: var(--muted); font-size: .88rem; }
+.accGoal { margin: .35rem 0 0; font-size: .95rem; }
+.accGoal:empty { display: none; }
+.accGrid { display: grid; gap: 1rem; margin-top: 1.8rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 1.3rem 1.3rem 1.2rem; box-shadow: var(--shadow); }
+.card h3 { margin: 0 0 1rem; font: 600 1.1rem var(--sans); letter-spacing: -.02em; }
+.card h3.mt { margin-top: 1.5rem; }
+.card .row { margin-top: .9rem; }
+.form2 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem .8rem; }
+.form2 .span2 { grid-column: 1 / -1; }
+.photoRow { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+.photoRow .row { margin-top: 0; }
+.err { color: var(--stop); font-size: .78rem; margin: .3rem 0 0; min-height: 0; }
+.err:empty { display: none; }
+.savedNote { color: var(--go); font-size: .82rem; margin: .8rem 0 0; min-height: 1.2em; }
+.savedNote.on { animation: fadeUp .3s ease; }
+.passState { margin: -.3rem 0 1rem; color: var(--muted); font-size: .9rem; }
+.setRow { margin-top: 1.1rem; }
+.sw { display: flex; align-items: center; gap: .8rem; padding: .7rem 0; border-top: 1px solid var(--line); cursor: pointer; font-size: .95rem; }
+.sw:first-of-type { border-top: 0; }
+.sw > span:first-child { flex: 1; }
+.sw input[type="time"] { width: 7rem; padding: .4rem .5rem; }
+.sw input[type="checkbox"], .swOnly input { position: absolute; opacity: 0; width: 0; height: 0; }
+.sw i, .swOnly i { flex: none; width: 2.6rem; height: 1.5rem; border-radius: 99px; background: var(--soft); border: 1px solid var(--line); position: relative; transition: background .25s; display: block; }
+.sw i::after, .swOnly i::after { content: ""; position: absolute; top: 2px; left: 2px; width: calc(1.5rem - 6px); height: calc(1.5rem - 6px); border-radius: 50%; background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .25s cubic-bezier(.3,1.4,.5,1); }
+.sw input:checked + i, .swOnly input:checked + i { background: var(--go); border-color: var(--go); }
+.sw input:checked + i::after, .swOnly input:checked + i::after { transform: translateX(1.1rem); }
+.sw input:focus-visible + i, .swOnly input:focus-visible + i { outline: 2px solid var(--ink); outline-offset: 2px; }
+.swOnly { cursor: pointer; position: relative; }
+.permRow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; padding-top: .9rem; margin-top: .3rem; border-top: 1px solid var(--line); font-size: .9rem; }
+.permRow .row { margin-top: 0; }
+.hudAva { width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid var(--line); background: var(--surface) center / cover no-repeat; display: grid; place-items: center;
+  font-size: 1.05rem; text-decoration: none; overflow: hidden; }
+.lock { position: fixed; inset: 0; z-index: 90; background: var(--bg); display: grid; place-items: center; padding: 2rem; animation: fadeIn .3s; }
+body.locked main, body.locked nav, body.locked .hud { visibility: hidden; }
+.lockBox { width: min(22rem, 100%); display: grid; justify-items: center; gap: .6rem; text-align: center; }
+.lockBox h2 { margin: .6rem 0 0; }
+.lockBox input { text-align: center; font-size: 1.2rem; letter-spacing: .2em; }
+.linkBtn { background: none; border: 0; color: var(--muted); font: 400 .85rem var(--sans); cursor: pointer; text-decoration: underline; margin-top: .4rem; }
+
+/* ---------- personal records ---------- */
+.prTitle { margin: 0 0 1.2rem; font: 600 clamp(1.9rem, 7vw, 2.8rem)/1.05 var(--sans); letter-spacing: -.04em; }
+.prSetup { max-width: 34rem; }
+.prSetup .row { margin-top: 1rem; }
+#prMain { display: grid; gap: 1rem; }
+.rankCard { display: grid; grid-template-columns: auto 1fr; gap: 1rem 1.3rem; align-items: center; }
+.rankBig { font-size: 3.6rem; line-height: 1; width: 5.2rem; height: 5.2rem; border-radius: 50%; display: grid; place-items: center; background: var(--soft); }
+.rankInfo { display: grid; gap: .15rem; }
+.rankInfo b { font: 600 2rem/1.05 var(--sans); letter-spacing: -.04em; }
+.rankScore { color: var(--muted); font-size: .9rem; }
+.rankInfo .lvlbar { margin-top: .5rem; }
+.bodySum { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; padding-top: .9rem; border-top: 1px solid var(--line); font-size: .92rem; }
+.bodySum .note { margin: 0; }
+.bodySum .btn { margin-left: auto; }
+.form4 { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem .8rem; }
+.form4 .span2 { grid-column: 1 / -1; }
+.addBtnCell { display: flex; align-items: flex-end; }
+.addBtnCell .btn { width: 100%; }
+.liftGrid { display: grid; gap: 1rem; }
+.lift { display: grid; gap: .55rem; }
+.liftHead { display: flex; justify-content: space-between; align-items: center; gap: .6rem; }
+.liftHead h3 { margin: 0; }
+.lift .rk { font-size: .82rem; padding: .2rem .6rem; border-radius: 99px; background: var(--soft); white-space: nowrap; }
+.lift .rk.muted { color: var(--muted); }
+.lift.r3 .rk { background: color-mix(in srgb, var(--warm) 20%, transparent); }
+.lift.r4 .rk, .lift.r5 .rk { background: color-mix(in srgb, #5b8def 18%, transparent); }
+.liftBest { font-size: 1.05rem; }
+.liftBest b { font-size: 1.35rem; letter-spacing: -.02em; }
+.liftLines { display: flex; flex-wrap: wrap; gap: .3rem 1rem; color: var(--muted); font-size: .85rem; }
+.lift .note { margin: 0; }
+.sets { list-style: none; margin: .2rem 0 0; padding: 0; border-top: 1px solid var(--line); }
+.sets li { display: grid; grid-template-columns: 1fr auto auto; gap: .6rem; align-items: center; padding: .35rem 0; border-bottom: 1px solid var(--line); font-size: .88rem; }
+.sets .d { color: var(--muted); }
+.sets .v { font-variant-numeric: tabular-nums; }
+.sets .ib { width: 1.7rem; height: 1.7rem; font-size: .75rem; }
+.rankChip { display: inline-block; margin-top: .55rem; font-size: .88rem; padding: .3rem .75rem; border-radius: 99px; background: var(--soft); color: var(--ink); text-decoration: none; border: 1px solid var(--line); }
+.rankChip:hover { border-color: var(--muted); }
+@media (max-width: 520px) { nav a { padding: .55rem .75rem; font-size: .8rem; } }
+
+/* ---------- login + sync ---------- */
+.rec.local { background: var(--muted); }
+.rec.pending { background: var(--warm); }
+.rec.err, .rec.off { background: var(--stop); }
+.authScreen { position: fixed; inset: 0; z-index: 95; background: var(--bg); display: grid; place-items: center; padding: 1.5rem; overflow-y: auto; animation: fadeIn .3s; }
+body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
+.authBox { width: min(24rem, 100%); }
+.authBrand { display: flex; align-items: center; gap: .5rem; font-weight: 600; font-size: 1.05rem; margin-bottom: 1.6rem; }
+.authBrand .rec { background: var(--go); }
+.authBox h2 { margin: 0 0 .3rem; font-size: 2rem; }
+.authBox .note { margin: 0 0 1.4rem; }
+#authForm { display: grid; gap: .6rem; }
+#authForm .btn { margin-top: .3rem; }
+.orLine { display: flex; align-items: center; gap: .8rem; color: var(--muted); font-size: .8rem; margin: 1.1rem 0; }
+.orLine::before, .orLine::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.setupBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .6rem; margin-top: .6rem; padding: .7rem .9rem;
+  border-radius: 12px; font-size: .88rem; background: color-mix(in srgb, var(--warm) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warm) 35%, var(--line)); }
+.setupBar .muted { color: var(--muted); }
+.setupBar .row { margin: 0; align-items: center; }
+.setupBar .setupSteps { flex-basis: 100%; margin: .3rem 0 0; }
+.setupSteps { margin: 0 0 1.5rem; padding-left: 1.2rem; display: grid; gap: .55rem; font-size: .92rem; line-height: 1.45; }
+.warnNote { margin: -.6rem 0 1.2rem; padding: .7rem .85rem; border-radius: 10px; font-size: .85rem; background: color-mix(in srgb, var(--warm) 16%, transparent); }
+.langPick { margin-left: auto; display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 99px; }
+.langPick button { font: 500 .72rem var(--sans); padding: .3rem .55rem; border: 0; border-radius: 99px; background: transparent; color: var(--muted); cursor: pointer; }
+.langPick button.on { background: var(--ink); color: var(--bg); }
+.okMsg { color: var(--go); font-size: .82rem; margin: 0; }
+.okMsg:empty { display: none; }
+.authBox .linkBtn { display: block; margin: .8rem 0 0; }
+.accHead { flex-wrap: wrap; }
+.signOutTop { margin-left: auto; align-self: flex-start; }
+.acctRow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem; padding: .2rem 0 1rem; margin-bottom: 1rem; border-bottom: 1px solid var(--line); font-size: .92rem; }
+
+/* ---------- wide screens: sidebar + main ---------- */
+@media (min-width: 1000px) {
+  .hud, main { max-width: 88rem; }
+  .hud { padding: 1.1rem 3rem; }
+  main { padding: 0 3rem 8rem; }
+  .tpage { display: grid; grid-template-columns: minmax(20rem, 25rem) minmax(0, 1fr); column-gap: 3.5rem; align-items: start;
+    grid-template-areas: "hero list" "journal list"; grid-template-rows: auto 1fr; }
+  .tpage .hero { grid-area: hero; margin-top: 1.4rem; padding: 2rem 1.8rem 1.6rem; }
+  .tpage .listArea { grid-area: list; min-width: 0; }
+  .tpage .journal { grid-area: journal; }
+  .tpage .journal h2 { font-size: 1.3rem; margin-top: 2rem; }
+  .stripWrap { margin-top: 1.4rem; }
+  .big { font-size: 6.5rem; }
+  #dayTitle { font-size: 2.8rem; }
+  .item .info { grid-template-columns: 4.5rem 1fr auto; grid-template-areas: "t who st"; align-items: center; padding: 1.15rem .6rem; gap: 1rem; }
+  .item .t { font-size: .9rem; }
+  .item .t.none { display: block; color: var(--line); }
+  .item .st { justify-self: end; font-size: .72rem; padding: .2rem .65rem; }
+  .item .nm { font-size: 1.2rem; }
+  .yes, .no { width: 2.9rem; height: 2.9rem; }
+  .dayBtn { width: 4.4rem; padding: .7rem 0; } .dayBtn .dn { font-size: 1.4rem; }
+  .ppage:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 3.5rem; align-items: start; }
+  .ppage .pcol:last-child > h2:first-child { margin-top: 4.2rem; }
+  .stats { grid-template-columns: repeat(4, 1fr); }
+  .accGrid { grid-template-columns: 1fr 1fr; gap: 1.2rem; align-items: start; }
+  .liftGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #prMain { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  #prMain .liftGrid { grid-column: 1 / -1; }
+  .form4 { grid-template-columns: 2fr 1fr 1fr; }
+  .form4 .span2 { grid-column: auto; }
+  .form4 #newExWrap { grid-column: 1 / -1; }
+  .accGrid .span2 { grid-column: 1 / -1; }
+  .accAva { width: 7rem; height: 7rem; font-size: 3.2rem; }
+  .accAva.small { width: 3.4rem; height: 3.4rem; font-size: 1.6rem; }
+  dialog { margin: auto; border-radius: 22px; width: min(36rem, 92vw); }
+}
+@media (max-width: 520px) { .form2 { grid-template-columns: 1fr; } }
+@media (min-width: 1500px) { .tpage { grid-template-columns: 27rem minmax(0, 1fr); } .big { font-size: 7.5rem; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; transition-duration: .001s !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="hud">
+  <span class="hudL"><span class="rec local" id="syncDot" title="">●</span><span class="brand">Routine</span><span class="mono" id="clock"></span></span>
+  <span class="hudR"><span class="lvl" id="lvlTag">LVL 1</span><a href="#profile" class="hudAva" id="hudAva" aria-label="Profile"></a><button class="themeBtn" id="themeBtn" aria-label="Theme">☾</button></span>
+</header>
+
+<main>
+  <div class="setupBar" id="setupBar" hidden>
+    <span>⚠ <b data-t="setupTitle"></b> <span class="muted" data-t="setupShort"></span></span>
+    <span class="row"><button class="btn ghost small" id="setupMore" data-t="setupMoreBtn"></button><button class="ib" id="setupClose" aria-label="Close">✕</button></span>
+    <ol class="setupSteps" id="setupSteps" hidden>
+      <li data-t="setup1"></li><li data-t="setup2"></li><li data-t="setup3"></li>
+    </ol>
+  </div>
+  <!-- ========== TODAY ========== -->
+  <section id="todayPage" class="tpage">
+    <div class="marquee" id="marquee"><div id="marqueeText"></div></div>
+
+    <div class="hero board" id="hero"><i class="c3"></i><i class="c4"></i>
+      <p class="hello"><em data-t="hi">Salom,</em> <b id="greetName" class="split"></b></p>
+      <div class="bal"><span class="big" id="bal">0</span><em data-t="coins">tanga</em></div>
+      <div class="segs" id="segs"></div>
+      <p class="status mono" id="status"></p>
+      <div class="heroRow">
+        <p class="streakTag" id="streakTag"></p>
+        <button class="btn ghost small" id="restBtn"></button>
+      </div>
+    </div>
+
+    <div class="listArea">
+      <div class="stripWrap">
+        <div class="strip" id="strip"></div>
+        <label class="jump" title="Sana"><span aria-hidden="true">📅</span><input type="date" id="jump" aria-label="Date"></label>
+      </div>
+      <h2 id="dayTitle"></h2>
+      <div class="sec mono"><span data-t="tasks"></span><span id="taskCount"></span></div>
+      <div class="list" id="taskList"></div>
+      <div id="sections"></div>
+      <p class="dayNote mono" id="dayNote"></p>
+      <div class="offList mono" id="offList"></div>
+      <div class="addRow">
+        <button class="btn" id="newTaskBtn" data-t="newTask"></button>
+        <button class="btn ghost" id="newBtn" data-t="newRoutineShort"></button>
+      </div>
+    </div>
+
+    <div class="journal">
+      <h2><span data-t="dayEnd"></span> <em data-t="howWas"></em></h2>
+      <div class="moods" id="moods">
+        <button aria-pressed="false">😞</button><button aria-pressed="false">😕</button><button aria-pressed="false">😐</button><button aria-pressed="false">🙂</button><button aria-pressed="false">😄</button>
+      </div>
+      <textarea id="note" data-tp="notePh"></textarea>
+    </div>
+  </section>
+
+  <!-- ========== PROFILE ========== -->
+  <section id="statsPage" class="me ppage" hidden>
+    <div class="pcol">
+      <div class="avatar" id="avatar">🙂</div>
+      <h1 id="pName" class="split"></h1>
+      <div class="stats">
+        <div><b id="stBal">0</b><span class="mono" data-t="stCoins"></span></div>
+        <div><b id="stLvl">1</b><span class="mono" data-t="stLevel"></span></div>
+        <div><b id="stBest">0</b><span class="mono" data-t="stBest"></span></div>
+        <div><b id="stDays">0</b><span class="mono" data-t="stDays"></span></div>
+      </div>
+      <div class="lvlbar"><i id="lvlBar"></i></div>
+      <p class="lvlText mono" id="lvlText"></p>
+
+      <h2><span data-t="week"></span> <em data-t="weekSub"></em></h2>
+      <div class="report" id="report"></div>
+
+      <h2><span data-t="cal"></span> <em data-t="calSub"></em></h2>
+      <div class="heat" id="heat"></div>
+      <p class="heatInfo mono" id="heatInfo"></p>
+    </div>
+    <div class="pcol">
+      <h2><span data-t="rStats"></span> <em data-t="rSub"></em></h2>
+      <div class="bars" id="bars"></div>
+      <h2><span data-t="badges"></span></h2>
+      <div class="badges" id="badges"></div>
+    </div>
+  </section>
+
+  <!-- ========== PERSONAL RECORDS (GYM) ========== -->
+  <section id="prPage" class="acc" hidden>
+    <h1 class="prTitle" data-t="prTitle"></h1>
+
+    <!-- step 1: body data -->
+    <div class="card prSetup" id="prSetup">
+      <h3 data-t="bodyTitle"></h3>
+      <p class="note" data-t="bodyWhy"></p>
+      <div class="form2">
+        <div><label class="f" for="bWeight" data-t="bWeight"></label><input id="bWeight" type="number" inputmode="decimal" min="25" max="300" step="0.1" placeholder="75"></div>
+        <div><label class="f" for="bHeight" data-t="bHeight"></label><input id="bHeight" type="number" inputmode="decimal" min="100" max="250" step="1" placeholder="178"></div>
+        <div class="span2"><span class="f" data-t="bSex"></span>
+          <div class="days" id="bSex"><button type="button" data-v="m" data-t="male"></button><button type="button" data-v="f" data-t="female"></button></div></div>
+      </div>
+      <p class="err" id="bodyErr"></p>
+      <div class="row"><button class="btn" id="bodySave" data-t="save"></button><button class="btn ghost" id="bodyCancel" data-t="cancel"></button></div>
+    </div>
+
+    <div id="prMain">
+      <!-- overall rank -->
+      <div class="card rankCard">
+        <div class="rankBig" id="rankIcon">🌱</div>
+        <div class="rankInfo">
+          <span class="f" data-t="strengthRank"></span>
+          <b id="rankName"></b>
+          <span class="rankScore" id="rankScore"></span>
+          <div class="lvlbar"><i id="rankBar"></i></div>
+          <span class="note" id="rankNext"></span>
+        </div>
+        <div class="bodySum">
+          <span id="bodyLine"></span>
+          <span id="bmiLine" class="note"></span>
+          <button class="btn ghost small" id="bodyEdit" data-t="bodyEdit"></button>
+        </div>
+      </div>
+
+      <!-- add a set -->
+      <div class="card">
+        <h3 data-t="addSet"></h3>
+        <div class="form4">
+          <div class="span2"><label class="f" for="sEx" data-t="exercise"></label><select id="sEx"></select></div>
+          <div><label class="f" for="sW" id="sWLabel" data-t="weightKg"></label><input id="sW" type="number" inputmode="decimal" min="0" step="0.5" placeholder="60"></div>
+          <div><label class="f" for="sR" data-t="reps"></label><input id="sR" type="number" inputmode="numeric" min="1" max="100" step="1" placeholder="8"></div>
+          <div class="span2" id="newExWrap" hidden><label class="f" for="sNewEx" data-t="newExName"></label><input id="sNewEx" data-tp="newExPh"></div>
+          <div><label class="f" for="sDate" data-t="fDate"></label><input id="sDate" type="date"></div>
+          <div class="addBtnCell"><button class="btn" id="setSave" data-t="save"></button></div>
+        </div>
+        <p class="err" id="setErr"></p>
+        <p class="note" data-t="formulaNote"></p>
+      </div>
+
+      <div class="liftGrid" id="liftGrid"></div>
+    </div>
+  </section>
+
+  <!-- ========== PROFILE / ACCOUNT ========== -->
+  <section id="profilePage" class="acc" hidden>
+    <div class="accHead">
+      <div class="accAva" id="accAva"></div>
+      <div class="accWho">
+        <h1 id="accName"></h1>
+        <p class="accSub" id="accSub"></p>
+        <p class="accGoal" id="accGoal"></p>
+        <a class="rankChip" id="accRank" href="#pr" hidden></a>
+      </div>
+      <button class="btn ghost warn signOutTop" id="signOutTop" data-t="signOutLong"></button>
+    </div>
+
+    <div class="accGrid">
+      <!-- Personal -->
+      <div class="card">
+        <h3 data-t="secPersonal"></h3>
+        <div class="photoRow">
+          <div class="accAva small" id="accAva2"></div>
+          <div class="row">
+            <button class="btn ghost small" id="photoBtn" data-t="photo"></button>
+            <button class="btn ghost small" id="photoDel" data-t="photoDel"></button>
+            <input type="file" id="photoFile" accept="image/*" hidden>
+          </div>
+        </div>
+        <div class="form2">
+          <div><label class="f" for="fFirst" data-t="fFirst"></label><input id="fFirst" autocomplete="given-name"></div>
+          <div><label class="f" for="fLast" data-t="fLast"></label><input id="fLast" autocomplete="family-name"></div>
+          <div><label class="f" for="fPhone" data-t="fPhone"></label><input id="fPhone" type="tel" inputmode="tel" placeholder="+998 90 123 45 67" autocomplete="tel"><p class="err" id="phoneErr"></p></div>
+          <div><label class="f" for="fEmail">Email</label><input id="fEmail" type="email" placeholder="ism@gmail.com" autocomplete="email"><p class="err" id="emailErr"></p></div>
+          <div><label class="f" for="fBirth" data-t="fBirth"></label><input id="fBirth" type="date"></div>
+          <div><label class="f" for="sEmoji" data-t="sEmoji"></label><input id="sEmoji" maxlength="4"></div>
+          <div class="span2"><label class="f" for="fGoal" data-t="fGoal"></label><input id="fGoal" data-tp="goalPh"></div>
+        </div>
+        <p class="savedNote" id="savedNote"></p>
+      </div>
+
+      <!-- Security -->
+      <div class="card">
+        <h3 data-t="secSecurity"></h3>
+        <div class="acctRow"><span><span data-t="acct"></span>: <b id="acctWho"></b></span><button class="btn ghost small" id="acctBtn"></button></div>
+        <p class="passState" id="passState"></p>
+        <div class="form2">
+          <div class="span2" id="curWrap"><label class="f" for="pCur" data-t="fCurPass"></label><input id="pCur" type="password" autocomplete="current-password"></div>
+          <div><label class="f" for="pNew" data-t="fNewPass"></label><input id="pNew" type="password" autocomplete="new-password"></div>
+          <div><label class="f" for="pNew2" data-t="fNewPass2"></label><input id="pNew2" type="password" autocomplete="new-password"></div>
+        </div>
+        <p class="err" id="passErr"></p>
+        <div class="row">
+          <button class="btn" id="passSave"></button>
+          <button class="btn ghost warn" id="passRemove" data-t="removePass"></button>
+          <button class="btn ghost" id="lockNow" data-t="lockNow"></button>
+        </div>
+        <div class="setRow"><label class="f" for="autoLock" data-t="autoLock"></label>
+          <select id="autoLock"><option value="0" data-t="lockNever"></option><option value="5" data-t="lock5"></option><option value="15" data-t="lock15"></option></select></div>
+        <p class="note" data-t="secNote"></p>
+      </div>
+
+      <!-- Notifications -->
+      <div class="card">
+        <h3 data-t="secNotif"></h3>
+        <label class="sw"><span data-t="nRoutine"></span><input type="checkbox" id="nRoutine"><i></i></label>
+        <label class="sw"><span data-t="nTasks"></span><input type="checkbox" id="nTasks"><i></i></label>
+        <div class="sw"><span data-t="nMorning"></span><input type="time" id="nMorningT"><label class="swOnly"><input type="checkbox" id="nMorning"><i></i></label></div>
+        <div class="sw"><span data-t="nEvening"></span><input type="time" id="nEveningT"><label class="swOnly"><input type="checkbox" id="nEvening"><i></i></label></div>
+        <label class="sw"><span data-t="nSound"></span><input type="checkbox" id="nSound"><i></i></label>
+        <label class="sw"><span data-t="nVibe"></span><input type="checkbox" id="nVibe"><i></i></label>
+        <div class="permRow"><span><span data-t="nPerm"></span>: <b id="permState"></b></span>
+          <span class="row"><button class="btn ghost small" id="askPerm" data-t="askPerm"></button><button class="btn ghost small" id="testNotif" data-t="testNotif"></button></span></div>
+        <p class="note" data-t="remindNote"></p>
+      </div>
+
+      <!-- Appearance + rules -->
+      <div class="card">
+        <h3 data-t="secLook"></h3>
+        <div class="form2">
+          <div><label class="f" for="sLang" data-t="sLang"></label>
+            <select id="sLang"><option value="uz">O'zbekcha</option><option value="ru">Русский</option><option value="en">English</option></select></div>
+          <div><label class="f" for="sTheme" data-t="sTheme"></label>
+            <select id="sTheme"><option value="time" data-t="thTime"></option><option value="auto" data-t="thAuto"></option><option value="light" data-t="thLight"></option><option value="dark" data-t="thDark"></option></select></div>
+        </div>
+        <h3 class="mt" data-t="secRules"></h3>
+        <div class="form2">
+          <div><label class="f" for="sMult" data-t="sMult"></label>
+            <select id="sMult"><option value="1" data-t="m1"></option><option value="2" data-t="m2"></option><option value="3" data-t="m3"></option></select></div>
+          <div><label class="f" for="sBonus" data-t="fBonus"></label><input id="sBonus" type="number" min="0" max="100"></div>
+        </div>
+      </div>
+
+      <!-- Data -->
+      <div class="card span2">
+        <h3 data-t="secData"></h3>
+        <div class="row">
+          <button class="btn ghost" id="exportBtn" data-t="export"></button>
+          <button class="btn ghost" id="importBtn" data-t="import"></button>
+          <button class="btn ghost warn" id="resetBtn" data-t="reset"></button>
+          <input type="file" id="importFile" accept=".json" hidden>
+        </div>
+        <details class="fold">
+          <summary><span data-t="ledger"></span> <em data-t="ledgerSub"></em></summary>
+          <ul class="log" id="log"></ul>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <a href="#today" id="navToday" data-t="navToday"></a>
+  <a href="#pr" id="navPr" data-t="navPr"></a>
+  <a href="#stats" id="navStats" data-t="navStats"></a>
+  <a href="#profile" id="navProfile" data-t="navProfile"></a>
+</nav>
+<div class="wipe" id="wipe"><i></i><i></i></div>
+
+<!-- Add / edit sheet -->
+<dialog id="dlg">
+  <form id="dlgForm" novalidate>
+    <h3 id="dlgTitle"></h3>
+    <div class="wide"><label class="f mono" for="fName" data-t="fName"></label><input id="fName" autocomplete="off"></div>
+    <div><label class="f mono" for="fTime" data-t="fTime"></label><input id="fTime" type="time"></div>
+    <div><label class="f mono" for="fPart" data-t="fPart"></label>
+      <select id="fPart"><option value="morning" data-t="morning"></option><option value="day" data-t="day"></option><option value="evening" data-t="evening"></option></select></div>
+    <div><label class="f mono" for="fMin" data-t="fMin"></label><input id="fMin" type="number" min="0" max="600"></div>
+    <div><label class="f mono" for="fCoins" data-t="fCoins"></label><input id="fCoins" type="number" min="1" max="100"></div>
+    <div class="wide"><label class="f mono" for="fTarget" data-t="fTarget"></label><input id="fTarget" type="number" min="1" max="50"></div>
+    <div class="wide"><span class="f mono" data-t="fDays"></span><div class="days" id="dayPick"></div></div>
+    <div class="dlgBtns">
+      <button type="button" class="btn ghost warn" id="dlgDel" data-t="del"></button>
+      <button type="button" class="btn ghost" id="dlgCancel" data-t="cancel"></button>
+      <button type="submit" class="btn" data-t="save"></button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Login / sign-up -->
+<div class="authScreen" id="auth" hidden>
+  <div class="authBox">
+    <div class="authBrand"><span class="rec"></span> Routine
+      <span class="langPick" id="authLang"><button type="button" data-l="uz">UZ</button><button type="button" data-l="ru">RU</button><button type="button" data-l="en">EN</button></span></div>
+    <div id="authLoading" class="note" data-t="loading"></div>
+    <div id="authMain">
+      <h2 id="authTitle"></h2>
+      <p class="note" data-t="authSub"></p>
+      <p class="warnNote" id="fileNote" data-t="e_file" hidden></p>
+      <button class="btn ghost wide" id="gBtn" data-t="google"></button>
+      <div class="orLine"><span data-t="or"></span></div>
+      <form id="authForm" novalidate>
+        <input id="aEmail" type="email" autocomplete="email" placeholder="Email">
+        <input id="aPass" type="password" autocomplete="current-password" data-tp="passPh">
+        <input id="aPass2" type="password" autocomplete="new-password" data-tp="pass2Ph">
+        <p class="err" id="authErr"></p>
+        <p class="okMsg" id="authOk"></p>
+        <button class="btn wide" type="submit" id="authSubmit"></button>
+      </form>
+      <button class="linkBtn" type="button" id="authToggle"></button>
+      <button class="linkBtn" type="button" id="authReset" data-t="resetPw"></button>
+      <button class="linkBtn" type="button" id="authLocal" data-t="localGo"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Lock screen -->
+<div class="lock" id="lock" hidden>
+  <form class="lockBox" id="lockForm">
+    <div class="accAva" id="lockAva"></div>
+    <h2 id="lockName"></h2>
+    <p class="note" data-t="lockHint"></p>
+    <input type="password" id="lockPass" autocomplete="current-password">
+    <p class="err" id="lockErr"></p>
+    <button class="btn wide" type="submit" data-t="unlock"></button>
+    <button class="linkBtn" type="button" id="forgotBtn" data-t="forgot"></button>
+  </form>
+</div>
+
+<!-- Task sheet -->
+<dialog id="tdlg">
+  <form id="tdlgForm" novalidate>
+    <h3 id="tdlgTitle"></h3>
+    <div class="wide"><label class="f mono" for="tName" data-t="fName"></label><input id="tName" autocomplete="off"></div>
+    <div><label class="f mono" for="tDate" data-t="fDate"></label><input id="tDate" type="date"></div>
+    <div><label class="f mono" for="tTime" data-t="fTime"></label><input id="tTime" type="time"></div>
+    <div class="wide"><label class="f mono" for="tCoins" data-t="fCoins"></label><input id="tCoins" type="number" min="0"></div>
+    <div class="wide"><span class="f mono" data-t="fRemind"></span><div class="days remPick" id="remPick"></div></div>
+    <div class="dlgBtns">
+      <button type="button" class="btn ghost warn" id="tdlgDel" data-t="del"></button>
+      <button type="button" class="btn ghost" id="tdlgCancel" data-t="cancel"></button>
+      <button type="submit" class="btn" data-t="save"></button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Timer -->
+<div class="timer" id="tOverlay" hidden>
+  <div class="tn" id="tName"></div>
+  <div class="clk" id="tClock"></div>
+  <div class="tb"><i id="tBar"></i></div>
+  <div class="row"><button class="btn ghost" id="tPause"></button><button class="btn ghost" id="tStop" data-t="tStop"></button></div>
+</div>
+<script>
+// ================================================================
+//  ROUTINE APP. Sections are numbered so you can find things fast.
+// ================================================================
+
+// ---------- 1. Words (Uzbek / English) ----------
+const WORDS = {
+  uz: {
+    hi: "Salom,", coins: "tanga", today: "Bugun", tapTick: "bosib belgilang", basics: "Asosiylar", tapAdd: "bosib qo'shing",
+    addAll: "Hammasini qo'shish", newRoutine: "+ Yangi odat", navToday: "Bugun", navProfile: "Profil",
+    doneOf: "{0}/{1} bajarildi", perfectRow: "{0} kun ketma-ket mukammal", startStreak: "Hammasini bajaring, streak boshlanadi",
+    restTag: "Dam olish kuni: jarima yo'q", restBtn: "Bugun dam olaman", restOff: "Dam olishni bekor qilish",
+    restConfirm: "Bugun dam olish kuni bo'lsinmi? Jarima bo'lmaydi va streaklar uzilmaydi.",
+    mNeg: "Qarzdasiz ✦ Biror narsani belgilang ✦ ", mAll: "Bugun hammasi bajarildi ✦ Zo'r ✦ ",
+    mNorm: "Tanga yig'ing ✦ Minusga tushmang ✦ ", mRest: "Dam olish kuni ✦ Kuch to'plang ✦ ",
+    morning: "Ertalab", day: "Kunduzi", evening: "Kechqurun", notToday: "Bugun emas:",
+    empty: "Hali odat yo'q. \"+ Yangi odat\" tugmasini bosing.", authIn: "Kirish", authUp: "Ro'yxatdan o'tish", authSub: "Ma'lumotlaringiz hamma qurilmangizda bir xil bo'ladi.", google: "Google bilan kirish",
+    or: "yoki", passPh: "Parol", pass2Ph: "Parolni takrorlang", submitIn: "Kirish", submitUp: "Akkaunt yaratish",
+    toUp: "Akkauntim yo'q, ro'yxatdan o'taman", toIn: "Akkauntim bor, kiraman", resetPw: "Parolni unutdim",
+    resetSent: "Parolni tiklash havolasi {0} manziliga yuborildi.", needEmail: "Avval emailingizni yozing.",
+    localGo: "Akkauntsiz davom etish (faqat shu qurilmada)", loading: "Yuklanmoqda…",
+    moveLocal: "Bu qurilmada saqlangan odat va tangalaringiz bor. Ularni akkauntingizga ko'chiraymi?",
+    setupTitle: "Akkaunt tizimi hali ulanmagan", setupText: "Ro'yxatdan o'tish oynasi chiqishi uchun bu fayl Firebase'ga ulanishi kerak. Hozir ma'lumotlar faqat shu brauzerda saqlanadi.",
+    setup1: "Firebase'dagi firebaseConfig kodini index.html ichidagi PASTE_... qatorlari o'rniga qo'ying.", setup2: "Firebase'da Google va Email/Password kirishini yoqing, Firestore bazasini oching.",
+    setup3: "Faylni GitHub'ga yuklang va saytni Netlify havolasi orqali oching (faylni kompyuterdan ochganda kirish ishlamaydi).", setupGo: "Hozircha akkauntsiz davom etish", setupShort: "Hozir ma'lumotlar faqat shu brauzerda saqlanadi.", setupMoreBtn: "Qanday ulash?",
+    signOutLong: "Hisobdan chiqish", signOutConfirm: "Hisobdan chiqasizmi? Qayta kirish uchun email va parolingiz (yoki Google) kerak bo'ladi.", acct: "Akkaunt", noAcct: "yo'q (faqat shu qurilma)", signIn: "Kirish", signOut: "Chiqish", friend: "do'st",
+    syncOk: "Bulutga saqlangan", syncPending: "Saqlanmoqda…", syncErr: "Bulutga saqlab bo'lmadi", syncOff: "Internet yo'q, shu qurilmada saqlanmoqda", syncLocal: "Faqat shu qurilmada",
+    e_email: "Email noto'g'ri.", e_cred: "Email yoki parol noto'g'ri.", e_inuse: "Bu email bilan akkaunt allaqachon bor. \"Kirish\" ni tanlang.",
+    e_weak: "Parol kamida 6 belgi bo'lsin.", e_file: "Kirish faqat saytda ishlaydi (faylni kompyuterdan ochganda emas).",
+    e_domain: "Bu sayt manzili Firebase'da ruxsat etilmagan (Authorized domains).", e_net: "Internet aloqasi yo'q.",
+    e_many: "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring.", e_provider: "Bu kirish usuli Firebase'da yoqilmagan.", navPr: "Rekordlar", prTitle: "Shaxsiy rekordlar", bodyTitle: "Avval o'zingiz haqingizda", bodyWhy: "Reyting ko'targan vazningizni tana vazningizga solishtirib hisoblanadi. Kuch standartlari jinsga qarab farq qiladi.", bWeight: "Tana vazni (kg)", bHeight: "Bo'y (sm)", bSex: "Jins", male: "Erkak", female: "Ayol", bodyBad: "Vazn 25–300 kg, bo'y 100–250 sm oralig'ida bo'lsin.", bodyEdit: "Vazn / bo'yni o'zgartirish", strengthRank: "Kuch reytingi", rankNone: "Hali rekord yo'q", rankNoneSub: "Birinchi mashqingizni qo'shing", score: "{0}/100 ball", nextOverall: "Keyingi daraja: {0}", bmi: "TVI {0} · {1}", bmiU: "vazn kam", bmiN: "me'yorda", bmiO: "ortiqcha vazn", bmiOb: "semizlik", addSet: "Natija qo'shish", exercise: "Mashq", weightKg: "Vazn (kg)", extraKg: "Qo'shimcha vazn (kg)", reps: "Takror", newEx: "+ Boshqa mashq", newExName: "Mashq nomi", newExPh: "Masalan: Biceps curl", setBad: "Vazn va takror sonini to'g'ri kiriting.", needExName: "Mashq nomini yozing.", formulaNote: "Bir martalik maksimum (1RM) Epley formulasi bilan taxminan hisoblanadi: vazn × (1 + takror ÷ 30). 10 dan ko'p takrorda aniqlik pasayadi. Reytinglar umumiy kuch standartlariga asoslangan taxminiy ko'rsatkich.", best: "Eng yaxshi: {0}", e1rm: "≈ {0} kg 1RM", ratio: "{0}× tana vazni", toNext: "{0} gacha: yana {1}", maxRank: "Eng yuqori daraja!", unranked: "Reytingsiz mashq", noSets: "Hali natija yo'q", repsUnit: "marta", newPR: "Yangi rekord!", prCoins: "🏆 Rekord: ", delSet: "Bu natija o'chirilsinmi?", bodyFirst: "Reyting uchun avval vazn va bo'yingizni kiriting.", ex_bench: "Bench press (yotib siqish)", ex_squat: "Squat (o'tirib-turish)", ex_deadlift: "Deadlift (o'lik tortish)", ex_ohp: "Overhead press (tik turib siqish)", ex_row: "Barbell row (egilib tortish)", ex_pullup: "Turnik (tortilish)", rk0: "Yangi", rk1: "Bronza", rk2: "Kumush", rk3: "Oltin", rk4: "Platina", rk5: "Olmos", navStats: "Statistika", memberSince: "{0} dan beri", secPersonal: "Shaxsiy ma'lumotlar", fFirst: "Ism", fLast: "Familiya",
+    fPhone: "Telefon raqam", fBirth: "Tug'ilgan kun", fGoal: "Asosiy maqsadim", goalPh: "Masalan: har kuni 7:00 da turish",
+    phoneBad: "Raqam noto'g'ri. Masalan: +998 90 123 45 67", emailBad: "Email noto'g'ri", saved: "Saqlandi ✓",
+    photo: "Rasm yuklash", photoDel: "Rasmni olib tashlash", secSecurity: "Xavfsizlik", passOff: "Parol o'rnatilmagan", passOn: "Parol o'rnatilgan 🔒",
+    fCurPass: "Hozirgi parol", fNewPass: "Yangi parol", fNewPass2: "Yangi parolni takrorlang", setPass: "Parol o'rnatish", changePass: "Parolni almashtirish",
+    removePass: "Parolni olib tashlash", lockNow: "Hozir qulflash", passShort: "Parol kamida 4 belgi bo'lsin.", passMismatch: "Yangi parollar bir xil emas.",
+    passWrong: "Parol noto'g'ri.", passSet: "Parol saqlandi 🔒", passRemoved: "Parol olib tashlandi.", autoLock: "Harakatsiz qolsa qulflash",
+    lockNever: "Hech qachon", lock5: "5 daqiqadan keyin", lock15: "15 daqiqadan keyin",
+    secNote: "Parol ilovani shu kompyuterda boshqa odam ochib qo'yishidan saqlaydi. Ma'lumotlarning o'zi shifrlanmaydi.",
+    unlock: "Ochish", lockHint: "Davom etish uchun parolni kiriting", forgot: "Parolni unutdim",
+    forgotConfirm: "Parolni tiklashning iloji yo'q. Hamma ma'lumot o'chirilib, ilova qaytadan boshlansinmi? (Zaxirangiz bo'lsa, keyin Import qilasiz.)",
+    secNotif: "Bildirishnomalar", nRoutine: "Odat vaqtida eslatish", nTasks: "Vazifa eslatmalari (3 kun / 1 kun / kuni)", nMorning: "Ertalabki reja",
+    nEvening: "Kechki xulosa", nSound: "Ovoz", nVibe: "Tebranish (Android)", nPerm: "Kompyuter bildirishnomalari", permGranted: "ruxsat berilgan",
+    permDenied: "brauzerda bloklangan", permDefault: "hali so'ralmagan", permNone: "bu brauzerda yo'q", askPerm: "Ruxsat so'rash", testNotif: "Sinab ko'rish",
+    testMsg: "Bildirishnomalar ishlayapti ✓", morningMsg: "☀ Bugun: {0} ta odat, {1} ta vazifa", eveningMsg: "🌙 Hali qoldi: {0} ta odat, {1} ta vazifa",
+    eveningAll: "🌙 Bugun hammasi bajarildi. Zo'r!", secLook: "Ko'rinish", secRules: "Qoidalar", fBonus: "7 kunlik streak bonusi (tanga)", secData: "Ma'lumotlar",
+    birthdayMsg: "Tug'ilgan kuningiz bilan, {0}!", tasks: "Vazifalar", newTask: "+ Vazifa", newRoutineShort: "+ Odat", tomorrow: "Ertaga", yesterday: "Kecha",
+    noTasks: "Bu kunga vazifa yo'q", stPlan: "Rejada", stMissed: "O'tkazildi", stOverdue: "Kechikkan", stRest: "Dam olish",
+    fDate: "Sana", fRemind: "Eslatma", r3: "3 kun oldin", r1: "1 kun oldin", r0: "O'sha kuni", taskNew: "Yangi vazifa", taskEdit: "Vazifa",
+    remIn: "🔔 {0}: {1} kundan keyin", remTomorrow: "🔔 {0}: ertaga", remToday: "🔔 {0}: bugun{1}",
+    hTask: "Vazifa: ", hTaskUndo: "Vazifa bekor: ", futureNote: "Kelajakdagi odatlarni o'sha kuni belgilaysiz.",
+    pastNote: "O'tgan kun: faqat ko'rish uchun.", needDate: "Sanani tanlang.", added: "Qo'shildi: {0}", addedOff: "Qo'shildi: {0} (bugun ro'yxatda yo'q, kunlarini tekshiring)", stWait: "Kutilmoqda", stDone: "Bajarildi", stFail: "Bekor", stLate: "Kechikmoqda", hFail: "Qila olmadim: ", hUnfail: "Qaytarildi: ", yes: "Qildim", no: "Qila olmadim", metaMin: "daq", metaMiss: "O'TKAZSA",
+    dayEnd: "Kun yakuni", howWas: "kun qanday o'tdi?", notePh: "Bugun nima o'rgandingiz, nima qiyin bo'ldi?",
+    dlgNew: "Yangi odat", dlgEdit: "Tahrirlash", fName: "Nomi", fTime: "Vaqt", fMin: "Daqiqa (taymer)", fCoins: "Tanga",
+    fTarget: "Kuniga necha marta", fPart: "Kunning qismi", fDays: "Qaysi kunlar", save: "Saqlash", cancel: "Bekor", del: "O'chirish",
+    delConfirm: "\"{0}\" o'chirilsinmi? Tangalar joyida qoladi.", dup: "\"{0}\" allaqachon ro'yxatda.", needDay: "Kamida bitta kunni tanlang.",
+    tPause: "Pauza", tResume: "Davom", tStop: "To'xtatish", timerDone: "Tayyor!",
+    stCoins: "tanga", stLevel: "daraja", stBest: "eng uzun streak", stDays: "faol kun",
+    levelProg: "{0} XP / keyingi darajagacha {1} XP",
+    week: "Hafta", weekSub: "oxirgi 7 kun", weekDone: "bajarildi", earned: "Topildi: +{0}", lost: "Yo'qotildi: −{0}",
+    mostMissed: "Eng ko'p o'tkazilgan: {0} ({1} marta)", bestH: "Eng barqaror: {0}", noData: "Hali ma'lumot kam. Bir hafta ishlating.",
+    cal: "Kalendar", calSub: "oxirgi 20 hafta", calTap: "Katakni bosing", calRest: "dam olish", calNone: "odat yo'q",
+    rStats: "Odatlar", rSub: "oxirgi 30 kun", badges: "Yutuqlar",
+    settings: "Sozlamalar", sName: "Ismingiz", sEmoji: "Avatar emoji", sLang: "Til", sMult: "O'tkazilgan odat uchun jarima",
+    m1: "Tangasining 1 barobari", m2: "Tangasining 2 barobari", m3: "Tangasining 3 barobari",
+    sTheme: "Mavzu", thTime: "Vaqtga qarab (19:00 dan 07:00 gacha tungi)", thAuto: "Qurilmaga mos", thLight: "Yorug'", thDark: "Qorong'i", sSound: "Ovoz va tebranish", sRemind: "Eslatmalar",
+    on: "Yoqilgan", off: "O'chirilgan", remindNote: "Eslatma odat vaqtida keladi, lekin faqat shu sahifa ochiq turganda.",
+    backup: "Zaxira", export: "Eksport", import: "Import", reset: "Hammasini o'chirish",
+    resetConfirm: "Barcha odatlar, tangalar va tarix o'chirilsinmi?", importOk: "Zaxira yuklandi.", importBad: "Bu fayl zaxira emas.",
+    saveFail: "Saqlab bo'lmadi. Zaxira eksport qiling.", ledger: "Tarix", ledgerSub: "oxirgi 30", nothing: "Hali hech narsa yo'q.",
+    hDone: "Bajarildi: ", hUndo: "Bekor qilindi: ", hMiss: "O'tkazildi: ", hStreak: "🔥{0} streak: ", hStreakUndo: "Streak bonusi bekor: ",
+    missed: "o'tkazib yuborilgan odatlar", tapCont: "DAVOM ETISH UCHUN BOSING", streakBurst: "{0} kun ketma-ket / {1} / +{2}",
+    levelUp: "Yangi daraja!", newBadge: "Yangi yutuq", remindTitle: "Vaqt bo'ldi: {0}"
+  },
+  en: {
+    hi: "Hi,", coins: "coins", today: "Today", tapTick: "tap to tick", basics: "Basics", tapAdd: "tap to add",
+    addAll: "Add all basics", newRoutine: "+ New routine", navToday: "Today", navProfile: "Profile",
+    doneOf: "{0} of {1} done", perfectRow: "{0} perfect days in a row", startStreak: "Tick everything today to start a streak",
+    restTag: "Rest day: no penalties", restBtn: "Make today a rest day", restOff: "Cancel rest day",
+    restConfirm: "Make today a rest day? No penalties, and streaks won't break.",
+    mNeg: "In debt ✦ Tick something ✦ ", mAll: "Clean sweep today ✦ All done ✦ ",
+    mNorm: "Stack the coins ✦ Don't go negative ✦ ", mRest: "Rest day ✦ Recharge ✦ ",
+    morning: "Morning", day: "Daytime", evening: "Evening", notToday: "Not today:",
+    empty: "Nothing here yet. Press \"+ New routine\".", authIn: "Sign in", authUp: "Create account", authSub: "Your data stays the same on every device.", google: "Continue with Google",
+    or: "or", passPh: "Password", pass2Ph: "Repeat password", submitIn: "Sign in", submitUp: "Create account",
+    toUp: "No account? Create one", toIn: "Have an account? Sign in", resetPw: "Forgot password",
+    resetSent: "A reset link was sent to {0}.", needEmail: "Type your email first.",
+    localGo: "Continue without an account (this device only)", loading: "Loading…",
+    moveLocal: "This device has routines and coins saved. Move them into your account?",
+    setupTitle: "Accounts aren't connected yet", setupText: "For the sign-up screen to appear, this file has to be connected to Firebase. For now your data is saved in this browser only.",
+    setup1: "Paste your firebaseConfig from Firebase over the PASTE_... lines in index.html.", setup2: "In Firebase, enable Google and Email/Password sign-in and create the Firestore database.",
+    setup3: "Upload the file to GitHub and open the site through its Netlify link (sign-in doesn't work when the file is opened from your computer).", setupGo: "Continue without an account for now", setupShort: "For now your data is saved in this browser only.", setupMoreBtn: "How to connect?",
+    signOutLong: "Sign out", signOutConfirm: "Sign out? You will need your email and password (or Google) to get back in.", acct: "Account", noAcct: "none (this device only)", signIn: "Sign in", signOut: "Sign out", friend: "friend",
+    syncOk: "Saved to the cloud", syncPending: "Saving…", syncErr: "Couldn't save to the cloud", syncOff: "Offline, saving on this device", syncLocal: "This device only",
+    e_email: "Invalid email.", e_cred: "Wrong email or password.", e_inuse: "An account with this email already exists. Choose Sign in.",
+    e_weak: "Use at least 6 characters.", e_file: "Sign-in only works on the website (not when the file is opened from your computer).",
+    e_domain: "This site address isn't allowed in Firebase (Authorized domains).", e_net: "No internet connection.",
+    e_many: "Too many attempts. Try again a bit later.", e_provider: "This sign-in method isn't enabled in Firebase.", navPr: "Records", prTitle: "Personal records", bodyTitle: "First, about you", bodyWhy: "Your rank compares what you lift with your body weight. Strength standards differ for men and women.", bWeight: "Body weight (kg)", bHeight: "Height (cm)", bSex: "Sex", male: "Male", female: "Female", bodyBad: "Weight must be 25–300 kg and height 100–250 cm.", bodyEdit: "Edit weight / height", strengthRank: "Strength rank", rankNone: "No records yet", rankNoneSub: "Add your first lift", score: "{0}/100 points", nextOverall: "Next rank: {0}", bmi: "BMI {0} · {1}", bmiU: "underweight", bmiN: "normal", bmiO: "overweight", bmiOb: "obese", addSet: "Add a result", exercise: "Exercise", weightKg: "Weight (kg)", extraKg: "Added weight (kg)", reps: "Reps", newEx: "+ Other exercise", newExName: "Exercise name", newExPh: "e.g. Biceps curl", setBad: "Enter a valid weight and number of reps.", needExName: "Type the exercise name.", formulaNote: "One-rep max (1RM) is estimated with the Epley formula: weight × (1 + reps ÷ 30). Accuracy drops above 10 reps. Ranks are a rough guide based on common strength standards.", best: "Best: {0}", e1rm: "≈ {0} kg 1RM", ratio: "{0}× body weight", toNext: "To {0}: {1} more", maxRank: "Top rank!", unranked: "Unranked exercise", noSets: "No results yet", repsUnit: "reps", newPR: "New record!", prCoins: "🏆 Record: ", delSet: "Delete this result?", bodyFirst: "Enter your weight and height first to get a rank.", ex_bench: "Bench press", ex_squat: "Squat", ex_deadlift: "Deadlift", ex_ohp: "Overhead press", ex_row: "Barbell row", ex_pullup: "Pull-ups", rk0: "Rookie", rk1: "Bronze", rk2: "Silver", rk3: "Gold", rk4: "Platinum", rk5: "Diamond", navStats: "Stats", memberSince: "Since {0}", secPersonal: "Personal info", fFirst: "First name", fLast: "Last name",
+    fPhone: "Phone number", fBirth: "Birthday", fGoal: "My main goal", goalPh: "e.g. wake up at 7:00 every day",
+    phoneBad: "Invalid number. Example: +998 90 123 45 67", emailBad: "Invalid email", saved: "Saved ✓",
+    photo: "Upload photo", photoDel: "Remove photo", secSecurity: "Security", passOff: "No password set", passOn: "Password is set 🔒",
+    fCurPass: "Current password", fNewPass: "New password", fNewPass2: "Repeat new password", setPass: "Set password", changePass: "Change password",
+    removePass: "Remove password", lockNow: "Lock now", passShort: "Use at least 4 characters.", passMismatch: "New passwords don't match.",
+    passWrong: "Wrong password.", passSet: "Password saved 🔒", passRemoved: "Password removed.", autoLock: "Lock when idle",
+    lockNever: "Never", lock5: "After 5 minutes", lock15: "After 15 minutes",
+    secNote: "The password stops someone else opening the app on this computer. The data itself is not encrypted.",
+    unlock: "Unlock", lockHint: "Enter your password to continue", forgot: "Forgot password",
+    forgotConfirm: "A password can't be recovered. Delete all data and start over? (If you have a backup, import it afterwards.)",
+    secNotif: "Notifications", nRoutine: "Remind at routine time", nTasks: "Task reminders (3 days / 1 day / on the day)", nMorning: "Morning plan",
+    nEvening: "Evening summary", nSound: "Sound", nVibe: "Vibration (Android)", nPerm: "Desktop notifications", permGranted: "allowed",
+    permDenied: "blocked in the browser", permDefault: "not asked yet", permNone: "not available here", askPerm: "Ask permission", testNotif: "Send a test",
+    testMsg: "Notifications work ✓", morningMsg: "☀ Today: {0} routines, {1} tasks", eveningMsg: "🌙 Still left: {0} routines, {1} tasks",
+    eveningAll: "🌙 Everything done today. Nice!", secLook: "Appearance", secRules: "Rules", fBonus: "7-day streak bonus (coins)", secData: "Data",
+    birthdayMsg: "Happy birthday, {0}!", tasks: "Tasks", newTask: "+ Task", newRoutineShort: "+ Routine", tomorrow: "Tomorrow", yesterday: "Yesterday",
+    noTasks: "No tasks for this day", stPlan: "Planned", stMissed: "Missed", stOverdue: "Overdue", stRest: "Rest day",
+    fDate: "Date", fRemind: "Remind me", r3: "3 days before", r1: "1 day before", r0: "On the day", taskNew: "New task", taskEdit: "Task",
+    remIn: "🔔 {0}: in {1} days", remTomorrow: "🔔 {0}: tomorrow", remToday: "🔔 {0}: today{1}",
+    hTask: "Task: ", hTaskUndo: "Task undone: ", futureNote: "You tick future routines on the day.",
+    pastNote: "Past day: view only.", needDate: "Pick a date.", added: "Added: {0}", addedOff: "Added: {0} (not scheduled today, check its days)", stWait: "Scheduled", stDone: "Done", stFail: "Cancelled", stLate: "Delayed", hFail: "Couldn't: ", hUnfail: "Refund: ", yes: "Done", no: "Couldn't do it", metaMin: "min", metaMiss: "MISS",
+    dayEnd: "Day's end", howWas: "how did it go?", notePh: "What did you learn today, what was hard?",
+    dlgNew: "New routine", dlgEdit: "Edit", fName: "Name", fTime: "Time", fMin: "Minutes (timer)", fCoins: "Coins",
+    fTarget: "Times per day", fPart: "Part of day", fDays: "Which days", save: "Save", cancel: "Cancel", del: "Delete",
+    delConfirm: "Delete \"{0}\"? Your coins stay as they are.", dup: "\"{0}\" is already on your list.", needDay: "Pick at least one day.",
+    tPause: "Pause", tResume: "Resume", tStop: "Stop", timerDone: "Done!",
+    stCoins: "coins", stLevel: "level", stBest: "best streak", stDays: "active days",
+    levelProg: "{0} XP / {1} XP to next level",
+    week: "Week", weekSub: "last 7 days", weekDone: "done", earned: "Earned: +{0}", lost: "Lost: −{0}",
+    mostMissed: "Most missed: {0} ({1} times)", bestH: "Most steady: {0}", noData: "Not enough data yet. Use it for a week.",
+    cal: "Calendar", calSub: "last 20 weeks", calTap: "Tap a square", calRest: "rest day", calNone: "no routines",
+    rStats: "Routines", rSub: "last 30 days", badges: "Badges",
+    settings: "Settings", sName: "Your name", sEmoji: "Avatar emoji", sLang: "Language", sMult: "Penalty for a missed routine",
+    m1: "Lose 1× its coins", m2: "Lose 2× its coins", m3: "Lose 3× its coins",
+    sTheme: "Theme", thTime: "By time of day (dark 7pm to 7am)", thAuto: "Match my device", thLight: "Light", thDark: "Dark", sSound: "Sound and vibration", sRemind: "Reminders",
+    on: "On", off: "Off", remindNote: "Reminders fire at a routine's time, but only while this page is open.",
+    backup: "Backup", export: "Export", import: "Import", reset: "Reset all",
+    resetConfirm: "Delete all routines, coins and history?", importOk: "Backup imported.", importBad: "That file isn't a routine backup.",
+    saveFail: "Couldn't save. Export a backup to be safe.", ledger: "Ledger", ledgerSub: "last 30", nothing: "Nothing yet.",
+    hDone: "Done: ", hUndo: "Unticked: ", hMiss: "Missed: ", hStreak: "🔥{0} streak: ", hStreakUndo: "Streak bonus undone: ",
+    missed: "missed routines", tapCont: "TAP TO CONTINUE", streakBurst: "{0} days in a row / {1} / +{2}",
+    levelUp: "Level up!", newBadge: "New badge", remindTitle: "Time for: {0}"
+  },
+  ru: {
+      "hi": "Привет,",
+      "coins": "монет",
+      "today": "Сегодня",
+      "tapTick": "нажмите, чтобы отметить",
+      "basics": "Основные",
+      "tapAdd": "нажмите, чтобы добавить",
+      "addAll": "Добавить все основные",
+      "newRoutine": "+ Новая привычка",
+      "navToday": "Сегодня",
+      "navProfile": "Профиль",
+      "doneOf": "{0} из {1} выполнено",
+      "perfectRow": "{0} идеальных дней подряд",
+      "startStreak": "Выполните всё сегодня, чтобы начать серию",
+      "restTag": "День отдыха: без штрафов",
+      "restBtn": "Сегодня отдыхаю",
+      "restOff": "Отменить день отдыха",
+      "restConfirm": "Сделать сегодня днём отдыха? Штрафов не будет, и серии не прервутся.",
+      "mNeg": "Вы в минусе ✦ Отметьте что-нибудь ✦ ",
+      "mAll": "Сегодня всё выполнено ✦ Отлично ✦ ",
+      "mNorm": "Копите монеты ✦ Не уходите в минус ✦ ",
+      "mRest": "День отдыха ✦ Набирайтесь сил ✦ ",
+      "morning": "Утро",
+      "day": "День",
+      "evening": "Вечер",
+      "notToday": "Не сегодня:",
+      "empty": "Пока пусто. Нажмите «+ Новая привычка».",
+      "authIn": "Вход",
+      "authUp": "Регистрация",
+      "authSub": "Ваши данные одинаковы на всех устройствах.",
+      "google": "Войти через Google",
+      "or": "или",
+      "passPh": "Пароль",
+      "pass2Ph": "Повторите пароль",
+      "submitIn": "Войти",
+      "submitUp": "Создать аккаунт",
+      "toUp": "Нет аккаунта? Зарегистрироваться",
+      "toIn": "Уже есть аккаунт? Войти",
+      "resetPw": "Забыли пароль",
+      "resetSent": "Ссылка для сброса пароля отправлена на {0}.",
+      "needEmail": "Сначала введите email.",
+      "localGo": "Продолжить без аккаунта (только на этом устройстве)",
+      "loading": "Загрузка…",
+      "moveLocal": "На этом устройстве сохранены привычки и монеты. Перенести их в ваш аккаунт?",
+      "setupTitle": "Аккаунты ещё не подключены",
+      "setupText": "Чтобы появилось окно регистрации, этот файл нужно подключить к Firebase. Пока данные сохраняются только в этом браузере.",
+      "setup1": "Вставьте firebaseConfig из Firebase вместо строк PASTE_... в index.html.",
+      "setup2": "В Firebase включите вход через Google и Email/Password и создайте базу Firestore.",
+      "setup3": "Загрузите файл на GitHub и откройте сайт по ссылке Netlify (вход не работает, если открыть файл с компьютера).",
+      "setupGo": "Пока продолжить без аккаунта",
+      "setupShort": "Пока данные сохраняются только в этом браузере.",
+      "setupMoreBtn": "Как подключить?",
+      "signOutLong": "Выйти из аккаунта",
+      "signOutConfirm": "Выйти? Чтобы войти снова, понадобятся email и пароль (или Google).",
+      "acct": "Аккаунт",
+      "noAcct": "нет (только это устройство)",
+      "signIn": "Войти",
+      "signOut": "Выйти",
+      "friend": "друг",
+      "syncOk": "Сохранено в облаке",
+      "syncPending": "Сохранение…",
+      "syncErr": "Не удалось сохранить в облако",
+      "syncOff": "Нет интернета, сохраняется на устройстве",
+      "syncLocal": "Только это устройство",
+      "e_email": "Неверный email.",
+      "e_cred": "Неверный email или пароль.",
+      "e_inuse": "Аккаунт с этим email уже есть. Выберите «Войти».",
+      "e_weak": "Пароль должен быть не короче 6 символов.",
+      "e_file": "Вход работает только на сайте (не когда файл открыт с компьютера).",
+      "e_domain": "Адрес этого сайта не разрешён в Firebase (Authorized domains).",
+      "e_net": "Нет подключения к интернету.",
+      "e_many": "Слишком много попыток. Попробуйте чуть позже.",
+      "e_provider": "Этот способ входа не включён в Firebase.",
+      navPr: "Рекорды", prTitle: "Личные рекорды", bodyTitle: "Сначала о вас", bodyWhy: "Рейтинг считается по отношению поднятого веса к весу тела. Нормативы силы отличаются для мужчин и женщин.", bWeight: "Вес тела (кг)", bHeight: "Рост (см)", bSex: "Пол", male: "Мужской", female: "Женский", bodyBad: "Вес должен быть 25–300 кг, рост 100–250 см.", bodyEdit: "Изменить вес / рост", strengthRank: "Рейтинг силы", rankNone: "Рекордов пока нет", rankNoneSub: "Добавьте первое упражнение", score: "{0}/100 баллов", nextOverall: "Следующий ранг: {0}", bmi: "ИМТ {0} · {1}", bmiU: "недостаток веса", bmiN: "норма", bmiO: "избыточный вес", bmiOb: "ожирение", addSet: "Добавить результат", exercise: "Упражнение", weightKg: "Вес (кг)", extraKg: "Доп. вес (кг)", reps: "Повторы", newEx: "+ Другое упражнение", newExName: "Название упражнения", newExPh: "Например: подъём на бицепс", setBad: "Введите корректный вес и число повторов.", needExName: "Введите название упражнения.", formulaNote: "Разовый максимум (1RM) рассчитывается приблизительно по формуле Эпли: вес × (1 + повторы ÷ 30). При более чем 10 повторах точность падает. Ранги — приблизительная оценка по общим нормативам силы.", best: "Лучший: {0}", e1rm: "≈ {0} кг 1RM", ratio: "{0}× веса тела", toNext: "До ранга «{0}»: ещё {1}", maxRank: "Высший ранг!", unranked: "Без рейтинга", noSets: "Результатов пока нет", repsUnit: "раз", newPR: "Новый рекорд!", prCoins: "🏆 Рекорд: ", delSet: "Удалить этот результат?", bodyFirst: "Для рейтинга сначала укажите вес и рост.", ex_bench: "Жим лёжа", ex_squat: "Приседания", ex_deadlift: "Становая тяга", ex_ohp: "Жим стоя", ex_row: "Тяга штанги в наклоне", ex_pullup: "Подтягивания", rk0: "Новичок", rk1: "Бронза", rk2: "Серебро", rk3: "Золото", rk4: "Платина", rk5: "Алмаз", "navStats": "Статистика",
+      "memberSince": "Участник с {0}",
+      "secPersonal": "Личные данные",
+      "fFirst": "Имя",
+      "fLast": "Фамилия",
+      "fPhone": "Номер телефона",
+      "fBirth": "День рождения",
+      "fGoal": "Моя главная цель",
+      "goalPh": "Например: вставать в 7:00 каждый день",
+      "phoneBad": "Неверный номер. Пример: +998 90 123 45 67",
+      "emailBad": "Неверный email",
+      "saved": "Сохранено ✓",
+      "photo": "Загрузить фото",
+      "photoDel": "Удалить фото",
+      "secSecurity": "Безопасность",
+      "passOff": "Пароль не установлен",
+      "passOn": "Пароль установлен 🔒",
+      "fCurPass": "Текущий пароль",
+      "fNewPass": "Новый пароль",
+      "fNewPass2": "Повторите новый пароль",
+      "setPass": "Установить пароль",
+      "changePass": "Сменить пароль",
+      "removePass": "Удалить пароль",
+      "lockNow": "Заблокировать",
+      "passShort": "Пароль должен быть не короче 4 символов.",
+      "passMismatch": "Новые пароли не совпадают.",
+      "passWrong": "Неверный пароль.",
+      "passSet": "Пароль сохранён 🔒",
+      "passRemoved": "Пароль удалён.",
+      "autoLock": "Блокировать при бездействии",
+      "lockNever": "Никогда",
+      "lock5": "Через 5 минут",
+      "lock15": "Через 15 минут",
+      "secNote": "Пароль не даёт другому человеку открыть приложение на этом компьютере. Сами данные не шифруются.",
+      "unlock": "Открыть",
+      "lockHint": "Введите пароль, чтобы продолжить",
+      "forgot": "Забыли пароль",
+      "forgotConfirm": "Пароль нельзя восстановить. Удалить все данные и начать заново? (Если есть резервная копия, потом импортируйте её.)",
+      "secNotif": "Уведомления",
+      "nRoutine": "Напоминать во время привычки",
+      "nTasks": "Напоминания о задачах (за 3 дня / за 1 день / в день)",
+      "nMorning": "Утренний план",
+      "nEvening": "Вечерний итог",
+      "nSound": "Звук",
+      "nVibe": "Вибрация (Android)",
+      "nPerm": "Уведомления на компьютере",
+      "permGranted": "разрешены",
+      "permDenied": "заблокированы в браузере",
+      "permDefault": "ещё не запрошены",
+      "permNone": "недоступны в этом браузере",
+      "askPerm": "Запросить разрешение",
+      "testNotif": "Проверить",
+      "testMsg": "Уведомления работают ✓",
+      "morningMsg": "☀ Сегодня: привычек {0}, задач {1}",
+      "eveningMsg": "🌙 Ещё осталось: привычек {0}, задач {1}",
+      "eveningAll": "🌙 Сегодня всё выполнено. Отлично!",
+      "secLook": "Внешний вид",
+      "secRules": "Правила",
+      "fBonus": "Бонус за 7-дневную серию (монеты)",
+      "secData": "Данные",
+      "birthdayMsg": "С днём рождения, {0}!",
+      "tasks": "Задачи",
+      "newTask": "+ Задача",
+      "newRoutineShort": "+ Привычка",
+      "tomorrow": "Завтра",
+      "yesterday": "Вчера",
+      "noTasks": "На этот день задач нет",
+      "stPlan": "Запланировано",
+      "stMissed": "Пропущено",
+      "stOverdue": "Просрочено",
+      "stRest": "День отдыха",
+      "fDate": "Дата",
+      "fRemind": "Напомнить",
+      "r3": "За 3 дня",
+      "r1": "За 1 день",
+      "r0": "В тот же день",
+      "taskNew": "Новая задача",
+      "taskEdit": "Задача",
+      "remIn": "🔔 {0}: через {1} дн.",
+      "remTomorrow": "🔔 {0}: завтра",
+      "remToday": "🔔 {0}: сегодня{1}",
+      "hTask": "Задача: ",
+      "hTaskUndo": "Задача отменена: ",
+      "futureNote": "Будущие привычки отмечаются в свой день.",
+      "pastNote": "Прошедший день: только просмотр.",
+      "needDate": "Выберите дату.",
+      "added": "Добавлено: {0}",
+      "addedOff": "Добавлено: {0} (сегодня не по расписанию, проверьте дни)",
+      "stWait": "Ожидается",
+      "stDone": "Выполнено",
+      "stFail": "Отменено",
+      "stLate": "Опаздывает",
+      "hFail": "Не смог: ",
+      "hUnfail": "Возврат: ",
+      "yes": "Сделал",
+      "no": "Не смог",
+      "metaMin": "мин",
+      "metaMiss": "ПРОПУСК",
+      "dayEnd": "Итог дня",
+      "howWas": "как прошёл день?",
+      "notePh": "Что вы сегодня узнали, что было трудно?",
+      "dlgNew": "Новая привычка",
+      "dlgEdit": "Изменить",
+      "fName": "Название",
+      "fTime": "Время",
+      "fMin": "Минуты (таймер)",
+      "fCoins": "Монеты",
+      "fTarget": "Сколько раз в день",
+      "fPart": "Часть дня",
+      "fDays": "По каким дням",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "del": "Удалить",
+      "delConfirm": "Удалить «{0}»? Монеты останутся как есть.",
+      "dup": "«{0}» уже есть в списке.",
+      "needDay": "Выберите хотя бы один день.",
+      "tPause": "Пауза",
+      "tResume": "Продолжить",
+      "tStop": "Стоп",
+      "timerDone": "Готово!",
+      "stCoins": "монет",
+      "stLevel": "уровень",
+      "stBest": "лучшая серия",
+      "stDays": "активных дней",
+      "levelProg": "{0} XP / до следующего уровня {1} XP",
+      "week": "Неделя",
+      "weekSub": "последние 7 дней",
+      "weekDone": "выполнено",
+      "earned": "Заработано: +{0}",
+      "lost": "Потеряно: −{0}",
+      "mostMissed": "Чаще всего пропускается: {0} ({1} раз)",
+      "bestH": "Самая стабильная: {0}",
+      "noData": "Пока мало данных. Попользуйтесь неделю.",
+      "cal": "Календарь",
+      "calSub": "последние 20 недель",
+      "calTap": "Нажмите на клетку",
+      "calRest": "день отдыха",
+      "calNone": "нет привычек",
+      "rStats": "Привычки",
+      "rSub": "последние 30 дней",
+      "badges": "Достижения",
+      "settings": "Настройки",
+      "sName": "Ваше имя",
+      "sEmoji": "Эмодзи аватара",
+      "sLang": "Язык",
+      "sMult": "Штраф за пропущенную привычку",
+      "m1": "1× её монет",
+      "m2": "2× её монет",
+      "m3": "3× её монет",
+      "sTheme": "Тема",
+      "thTime": "По времени суток (тёмная с 19:00 до 07:00)",
+      "thAuto": "Как на устройстве",
+      "thLight": "Светлая",
+      "thDark": "Тёмная",
+      "sSound": "Звук и вибрация",
+      "sRemind": "Напоминания",
+      "on": "Вкл.",
+      "off": "Выкл.",
+      "remindNote": "Напоминания приходят во время привычки, но только пока эта страница открыта.",
+      "backup": "Резервная копия",
+      "export": "Экспорт",
+      "import": "Импорт",
+      "reset": "Удалить всё",
+      "resetConfirm": "Удалить все привычки, монеты и историю?",
+      "importOk": "Резервная копия загружена.",
+      "importBad": "Этот файл не является резервной копией.",
+      "saveFail": "Не удалось сохранить. Сделайте экспорт на всякий случай.",
+      "ledger": "История",
+      "ledgerSub": "последние 30",
+      "nothing": "Пока ничего нет.",
+      "hDone": "Выполнено: ",
+      "hUndo": "Отменено: ",
+      "hMiss": "Пропущено: ",
+      "hStreak": "🔥 серия {0}: ",
+      "hStreakUndo": "Бонус серии отменён: ",
+      "missed": "пропущенные привычки",
+      "tapCont": "НАЖМИТЕ, ЧТОБЫ ПРОДОЛЖИТЬ",
+      "streakBurst": "{0} дней подряд / {1} / +{2}",
+      "levelUp": "Новый уровень!",
+      "newBadge": "Новое достижение",
+      "remindTitle": "Пора: {0}"
+  }
+};
+const DAYS_SHORT = { uz: ["Ya","Du","Se","Ch","Pa","Ju","Sh"], en: ["Su","Mo","Tu","We","Th","Fr","Sa"], ru: ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"] };
+const WEEKDAYS_UZ = ["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
+const MONTHS_UZ = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
+function tr(k, ...a) {
+  let s = (WORDS[state.lang] || WORDS.uz)[k] ?? WORDS.en[k] ?? k;
+  a.forEach((v, i) => { s = s.replace("{" + i + "}", v); });
+  return s;
+}
+
+// ---------- 2. Data and autosave ----------
+const KEY = "routine-app";
+const ALL_DAYS = [0,1,2,3,4,5,6];
+const PARTS = ["morning", "day", "evening"];
+function blankState() {
+  return { name: "", emoji: "🙂", mult: 2, theme: "time", lastName: "", phone: "", email: "", birth: "", goal: "", photo: "", pass: null, autoLock: 0, bonus: 5, vibe: true, taskRemind: true, morning: "", evening: "", shownSum: {}, lang: "uz", sound: true, remind: false,
+           habits: [], tasks: [], body: null, lifts: {}, customEx: [], prBest: {}, shownRem: {}, done: {}, failed: {}, counts: {}, rest: {}, journal: {}, badges: {},
+           balance: 0, xp: 0, settled: null, history: [], best: 0, timers: 0 };
+}
+let state;
+try { state = Object.assign(blankState(), JSON.parse(localStorage.getItem(KEY)) || {}); }
+catch (e) { state = blankState(); }
+let storeKey = KEY;          // which local copy we use (one per signed-in account)
+function readLocal(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+function save() {
+  try { localStorage.setItem(storeKey, JSON.stringify(state)); }
+  catch (e) { alert(tr("saveFail")); }
+  if (cloud.user) scheduleCloud();
+}
+const $ = id => document.getElementById(id);
+
+// ---------- 3. Dates ----------
+function dayStr(d) { return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function today() { return dayStr(new Date()); }
+function toDate(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); }
+function addDays(s, n) { const d = toDate(s); d.setDate(d.getDate() + n); return dayStr(d); }
+function weekday(s) { return toDate(s).getDay(); }
+function fmtShort(s) {     // 3-noyabr 2026 / 3 ноября 2026 / 3 Nov 2026
+  const d = toDate(s);
+  if (state.lang === "uz") return d.getDate() + "-" + MONTHS_UZ[d.getMonth()] + " " + d.getFullYear();
+  return d.toLocaleDateString(state.lang === "ru" ? "ru-RU" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+function fmtDate(s) {
+  const d = toDate(s);
+  if (state.lang === "uz") return WEEKDAYS_UZ[d.getDay()] + ", " + d.getDate() + "-" + MONTHS_UZ[d.getMonth()];
+  if (state.lang === "ru") { const t = d.toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }); return t.charAt(0).toUpperCase() + t.slice(1); }
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+// ---------- 4. Basic routines (edit names, times, days, coins here) ----------
+// days: 0 = Sunday, 1 = Monday ... 6 = Saturday. target = times per day.
+const BASICS = [
+  { name: "Soat 7:00 da uyg'onish", time: "07:00", part: "morning", minutes: 0,  coins: 3, target: 1, days: ALL_DAYS },
+  { name: "Joyni yig'ishtirish",    time: "07:05", part: "morning", minutes: 2,  coins: 1, target: 1, days: ALL_DAYS },
+  { name: "Tishni yuvish",          time: "07:10", part: "morning", minutes: 3,  coins: 1, target: 1, days: ALL_DAYS },
+  { name: "Nonushta qilish",        time: "07:30", part: "morning", minutes: 15, coins: 1, target: 1, days: ALL_DAYS },
+  { name: "Darsga qatnashish",      time: "",      part: "day",     minutes: 0,  coins: 3, target: 1, days: [1,2,3,4,5] },
+  { name: "Yangi narsa o'rganish",  time: "",      part: "day",     minutes: 20, coins: 2, target: 1, days: ALL_DAYS },
+  { name: "Mashq qilish",           time: "",      part: "day",     minutes: 15, coins: 2, target: 1, days: [1,3,5] },
+  { name: "8 stakan suv ichish",    time: "",      part: "day",     minutes: 0,  coins: 1, target: 8, days: ALL_DAYS },
+  { name: "Kitob o'qish",           time: "",      part: "evening", minutes: 10, coins: 2, target: 1, days: ALL_DAYS },
+  { name: "Ertangi kunni rejalash", time: "22:00", part: "evening", minutes: 5,  coins: 1, target: 1, days: ALL_DAYS },
+  { name: "Soat 23:00 da yotish",   time: "23:00", part: "evening", minutes: 0,  coins: 2, target: 1, days: ALL_DAYS }
+];
+
+// ---------- 5. Rules: schedule, done, counts ----------
+function partFromTime(tm) { if (!tm) return "day"; const h = +tm.slice(0, 2); return h < 12 ? "morning" : h < 17 ? "day" : "evening"; }
+function scheduled(h, d) { return h.created <= d && h.days.includes(weekday(d)); }
+function isDone(id, d) { return (state.done[d] || []).includes(id); }
+function isFailed(id, d) { return (state.failed[d] || {})[id] !== undefined; }
+function countOf(h, d) {
+  if (h.target <= 1) return isDone(h.id, d) ? 1 : 0;
+  const c = (state.counts[d] || {})[h.id];
+  return c !== undefined ? c : (isDone(h.id, d) ? h.target : 0);
+}
+function hasHabit(name, except) { return state.habits.some(h => h !== except && h.name.toLowerCase() === name.toLowerCase()); }
+function placeByTime(h) {   // put a routine in its section, in clock order
+  const sec = state.habits.filter(x => x.part === h.part && x !== h).sort((a, b) => a.order - b.order);
+  let i = h.time ? sec.findIndex(x => x.time && x.time > h.time) : -1;
+  if (i < 0) i = sec.length;
+  sec.splice(i, 0, h); sec.forEach((x, k) => { x.order = k; });
+}
+function addHabit(v) {
+  if (hasHabit(v.name)) return false;
+  const h = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: v.name, time: v.time || "",
+    part: v.part || partFromTime(v.time), minutes: +v.minutes || 0, coins: Math.max(1, +v.coins || 1),
+    target: Math.max(1, +v.target || 1), days: [...(v.days || ALL_DAYS)], created: today(), order: 0 };
+  state.habits.push(h); placeByTime(h);
+  return true;
+}
+
+// ---------- 6. Coins, XP, levels ----------
+function addCoins(amount, text, date) {
+  state.balance += amount;
+  state.history.unshift({ date: date || today(), text, amount });
+  state.history = state.history.slice(0, 300);
+}
+function levelOf(xp) { return Math.floor(Math.sqrt(Math.max(0, xp) / 5)) + 1; }
+function xpFor(level) { return 5 * (level - 1) * (level - 1); }
+
+// Charge for missed routines on finished days (rest days are skipped)
+function settle() {
+  const t = today(); let lost = 0;
+  if (!state.settled) { state.settled = addDays(t, -1); save(); return 0; }
+  let d = addDays(state.settled, 1), guard = 0;
+  while (d < t && guard++ < 400) {
+    if (!state.rest[d]) {
+      for (const h of state.habits) {
+        if (scheduled(h, d) && !isDone(h.id, d) && !isFailed(h.id, d)) {
+          const amt = h.coins * state.mult; lost += amt;
+          addCoins(-amt, tr("hMiss") + h.name, d);
+        }
+      }
+    }
+    state.settled = d; d = addDays(d, 1);
+  }
+  checkProgress(); save(); return lost;
+}
+
+// ---------- 7. Streaks ----------
+const bonus = () => (state.bonus ?? 5);   // extra coins every 7 days in a row (set in Profile)
+// Unscheduled days and rest days are skipped: they neither count nor break.
+function streakOf(h) {
+  const t = today(); let d = t, n = 0, guard = 0;
+  if (scheduled(h, t) && !state.rest[t] && !isDone(h.id, t)) d = addDays(t, -1);  // today still open
+  while (d >= h.created && guard++ < 1000) {
+    if (state.rest[d] || !scheduled(h, d)) { d = addDays(d, -1); continue; }
+    if (!isDone(h.id, d)) break;
+    n++; d = addDays(d, -1);
+  }
+  return n;
+}
+function perfectDay(d) {   // "yes", "no" or "skip"
+  if (state.rest[d]) return "skip";
+  const hs = state.habits.filter(h => scheduled(h, d));
+  if (!hs.length) return "skip";
+  return hs.every(h => isDone(h.id, d)) ? "yes" : "no";
+}
+function perfectStreak() {
+  if (!state.habits.length) return 0;
+  const first = state.habits.reduce((m, h) => h.created < m ? h.created : m, "9999");
+  const t = today(); let d = perfectDay(t) === "no" ? addDays(t, -1) : t, n = 0, guard = 0;
+  while (d >= first && guard++ < 3700) {
+    const r = perfectDay(d);
+    if (r === "no") break;
+    if (r === "yes") n++;
+    d = addDays(d, -1);
+  }
+  return n;
+}
+
+// ---------- 8. Badges ----------
+const BADGES = [
+  { id: "first",     ic: "👣", uz: "Birinchi qadam",  en: "First step", ru: "Первый шаг",     test: () => Object.values(state.done).some(a => a.length) },
+  { id: "perfect1",  ic: "⭐", uz: "Mukammal kun",    en: "Perfect day", ru: "Идеальный день",    test: () => state.best >= 1 },
+  { id: "perfect7",  ic: "🏅", uz: "Mukammal hafta",  en: "Perfect week", ru: "Идеальная неделя",   test: () => state.best >= 7 },
+  { id: "perfect30", ic: "🏆", uz: "Mukammal oy",     en: "Perfect month", ru: "Идеальный месяц",  test: () => state.best >= 30 },
+  { id: "streak7",   ic: "🔥", uz: "7 kun olov",      en: "7-day fire", ru: "7 дней огня",     test: () => state.habits.some(h => streakOf(h) >= 7) },
+  { id: "streak30",  ic: "☄️", uz: "30 kun olov",     en: "30-day fire", ru: "30 дней огня",    test: () => state.habits.some(h => streakOf(h) >= 30) },
+  { id: "early",     ic: "🌅", uz: "Erta turuvchi",   en: "Early riser", ru: "Ранняя пташка",    test: () => state.habits.some(h => /uyg'on|wake/i.test(h.name) && streakOf(h) >= 7) },
+  { id: "rich100",   ic: "💰", uz: "100 tanga",       en: "100 coins", ru: "100 монет",      test: () => state.balance >= 100 },
+  { id: "comeback",  ic: "🪜", uz: "Qarzdan chiqdi",  en: "Out of debt", ru: "Выход из минуса",    test: () => state.wasNeg && state.balance >= 0 },
+  { id: "lvl5",      ic: "⚡", uz: "5-daraja",        en: "Level 5", ru: "Уровень 5",        test: () => levelOf(state.xp) >= 5 },
+  { id: "lvl10",     ic: "👑", uz: "10-daraja",       en: "Level 10", ru: "Уровень 10",       test: () => levelOf(state.xp) >= 10 },
+  { id: "timer10",   ic: "⏱️", uz: "Diqqat ustasi",   en: "Focus master", ru: "Мастер фокуса",   test: () => (state.timers || 0) >= 10 },
+  { id: "journal7",  ic: "📓", uz: "Kundalikchi",     en: "Journaler", ru: "Летописец",      test: () => Object.values(state.journal).filter(j => j.mood || j.text).length >= 7 }
+];
+// After every change: best streak, level-ups, new badges
+function checkProgress(silent) {
+  const ps = perfectStreak(); if (ps > (state.best || 0)) state.best = ps;
+  if (state.balance < 0) state.wasNeg = true;
+  const lvl = levelOf(state.xp);
+  if (lvl > (state.lvlSeen || 1)) { if (!silent) burst("LVL " + lvl, tr("levelUp"), "var(--lime)"); state.lvlSeen = lvl; }
+  for (const b of BADGES) {
+    if (!state.badges[b.id] && b.test()) {
+      state.badges[b.id] = today();
+      if (!silent) burst(b.ic, tr("newBadge") + ": " + b[state.lang] || b.uz);
+    }
+  }
+}
+
+// ---------- 9. Sound and vibration ----------
+let ac;
+function tone(notes, type = "triangle", len = .09) {
+  if (!state.sound) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = ac.currentTime;
+    notes.forEach((f, i) => {
+      if (!f) return;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t0 + i * len);
+      g.gain.exponentialRampToValueAtTime(.15, t0 + i * len + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, t0 + i * len + len * 1.6);
+      o.connect(g).connect(ac.destination); o.start(t0 + i * len); o.stop(t0 + i * len + len * 1.8);
+    });
+  } catch (e) {}
+}
+const SFX = {
+  tick: () => tone([660, 990]), untick: () => tone([520, 330]), step: () => tone([740]),
+  penalty: () => tone([220, 165, 110], "sawtooth", .14), win: () => tone([523, 659, 784, 1047]),
+  alarm: () => tone([880, 0, 880, 0, 1175], "square", .12)
+};
+function buzz(p) { if (state.vibe !== false && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
+
+// ---------- 10. Motion helpers ----------
+function splitText(el, text) {
+  el.innerHTML = "";
+  [...text].forEach((ch, i) => {
+    const s = document.createElement("span");
+    s.textContent = ch === " " ? "\u00a0" : ch; s.style.setProperty("--i", i); el.appendChild(s);
+  });
+}
+let shownBal = null;
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function setFlaps(el, text) { el.textContent = String(text); }
+function rollNumber(el, to) {            // number counts smoothly
+  const from = shownBal === null ? to : shownBal; shownBal = to;
+  if (from === to || reduceMotion()) { el.textContent = to; return; }
+  const start = performance.now(), dur = 650;
+  (function step(now) {
+    const p = Math.min(1, (now - start) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e);
+    if (p < 1) requestAnimationFrame(step);
+  })(start);
+}
+function restart(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+function floatCoins(x, y, amount) {
+  const f = document.createElement("div");
+  f.className = "float" + (amount < 0 ? " minus" : "");
+  f.textContent = (amount > 0 ? "+" : "") + amount;
+  f.style.left = (x - 20) + "px"; f.style.top = (y - 30) + "px";
+  document.body.appendChild(f); setTimeout(() => f.remove(), 950);
+}
+let burstAt = 0;   // queue big pop-ups so they don't overlap
+function burst(big, small, color) {
+  const wait = Math.max(0, burstAt - Date.now());
+  burstAt = Math.max(Date.now(), burstAt) + 1700;
+  setTimeout(() => {
+    const b = document.createElement("div");
+    b.className = "burst"; if (color) b.style.color = color;
+    b.innerHTML = "<b></b><em></em>";
+    b.querySelector("b").textContent = big; b.querySelector("em").textContent = small;
+    document.body.appendChild(b); SFX.win(); buzz([30, 40, 30]);
+    setTimeout(() => b.remove(), 1650);
+  }, wait);
+}
+function showPenalty(lost) {
+  const s = document.createElement("div");
+  s.className = "slam shake";
+  s.innerHTML = `<b>−${lost}</b><em></em><div class="mono"></div>`;
+  s.querySelector("em").textContent = tr("missed"); s.querySelector(".mono").textContent = tr("tapCont");
+  s.onclick = () => s.remove();
+  document.body.appendChild(s); SFX.penalty(); buzz([80, 60, 80]);
+  setTimeout(() => s.remove(), 3200);
+}
+let toastAt = 0;   // toasts wait their turn instead of overlapping
+function toast(text) {
+  const wait = Math.max(0, toastAt - Date.now()); toastAt = Math.max(Date.now(), toastAt) + 3600;
+  setTimeout(() => {
+    const t = document.createElement("div"); t.className = "toast"; t.textContent = text;
+    document.body.appendChild(t); setTimeout(() => t.remove(), 4100);
+  }, wait);
+}
+
+// ---------- 11. Ticking (normal and counted routines) ----------
+function complete(h) {
+  const d = today();
+  (state.done[d] || (state.done[d] = [])).push(h.id);
+  addCoins(h.coins, tr("hDone") + h.name); state.xp += h.coins;
+  let amt = h.coins;
+  const s = streakOf(h);
+  if (s > 0 && s % 7 === 0) {
+    amt += bonus(); state.xp += bonus();
+    addCoins(bonus(), tr("hStreak", s) + h.name);
+    burst("🔥" + s, tr("streakBurst", s, h.name, bonus()), "var(--violet)");
+  }
+  SFX.tick(); buzz(30); restart($("hero"), "cut");
+  return amt;
+}
+function uncomplete(h) {
+  const d = today(), s = streakOf(h);            // streak before unticking
+  state.done[d] = (state.done[d] || []).filter(id => id !== h.id);
+  addCoins(-h.coins, tr("hUndo") + h.name); state.xp = Math.max(0, state.xp - h.coins);
+  let amt = -h.coins;
+  if (s > 0 && s % 7 === 0) {
+    amt -= bonus(); state.xp = Math.max(0, state.xp - bonus());
+    addCoins(-bonus(), tr("hStreakUndo") + h.name);
+  }
+  SFX.untick();
+  return amt;
+}
+function unfail(h) {
+  const d = today(), amt = state.failed[d][h.id];
+  delete state.failed[d][h.id];
+  if (amt) addCoins(amt, tr("hUnfail") + h.name);
+  return amt;
+}
+function toggleFail(h, ev) {
+  const d = today(); let amt;
+  if (isFailed(h.id, d)) { amt = unfail(h); SFX.step(); }
+  else {
+    amt = 0;
+    if (isDone(h.id, d)) amt += uncomplete(h);
+    if (h.target > 1) (state.counts[d] || (state.counts[d] = {}))[h.id] = 0;
+    const pen = state.rest[d] ? 0 : h.coins * state.mult;       // no penalty on a rest day
+    (state.failed[d] || (state.failed[d] = {}))[h.id] = pen;
+    if (pen) addCoins(-pen, tr("hFail") + h.name);
+    amt -= pen; SFX.penalty(); buzz([60, 40, 60]);
+  }
+  checkProgress(); save(); render();
+  const row = document.querySelector(`.item[data-id="${h.id}"]`); restart(row, "pop");
+  if (amt && ev) floatCoins(ev.clientX, ev.clientY, amt);
+}
+function setCount(h, n, ev) {
+  const d = today(), old = countOf(h, d);
+  n = Math.max(0, Math.min(h.target, n));
+  if (n === old) return;
+  let refund = 0;
+  if (n > old && isFailed(h.id, d)) refund = unfail(h);          // changed mind: did it after all
+  if (h.target > 1) (state.counts[d] || (state.counts[d] = {}))[h.id] = n;
+  const was = old >= h.target, now = n >= h.target;
+  let amt = 0;
+  if (!was && now) amt = complete(h);
+  else if (was && !now) amt = uncomplete(h);
+  else { SFX.step(); buzz(12); }
+  amt += refund;
+  checkProgress(); save(); render();
+  const row = document.querySelector(`.item[data-id="${h.id}"]`);
+  restart(row, "pop");
+  if (amt) {
+    const r = row ? row.getBoundingClientRect() : { right: innerWidth / 2 + 40, top: innerHeight / 2, height: 0 };
+    floatCoins(ev && ev.clientX ? ev.clientX : r.right - 40, ev && ev.clientY ? ev.clientY : r.top + r.height / 2, amt);
+  }
+}
+
+// ---------- 12. Timer ----------
+let timer = null, timerLoop = null;
+function startTimer(h) {
+  if (timer) return;
+  timer = { id: h.id, total: h.minutes * 60000, end: Date.now() + h.minutes * 60000, paused: false, left: 0 };
+  $("tName").textContent = h.name; $("tClock").innerHTML = ""; $("tPause").textContent = tr("tPause");
+  $("tOverlay").classList.remove("fin"); $("tOverlay").hidden = false;
+  SFX.step(); drawTimer(); timerLoop = setInterval(drawTimer, 250);
+}
+let lastSec = -1;
+function drawTimer() {
+  if (!timer) return;
+  const left = timer.paused ? timer.left : timer.end - Date.now();
+  if (left <= 0) { finishTimer(); return; }
+  const sec = Math.ceil(left / 1000);
+  setFlaps($("tClock"), String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0"));
+  $("tBar").style.width = (100 * (1 - left / timer.total)) + "%";
+  
+}
+function finishTimer() {
+  const h = state.habits.find(x => x.id === timer.id);
+  timer = null; clearInterval(timerLoop);
+  state.timers = (state.timers || 0) + 1;
+  setFlaps($("tClock"), tr("timerDone").toUpperCase()); $("tBar").style.width = "100%"; $("tOverlay").classList.add("fin");
+  SFX.alarm(); buzz([200, 100, 200]);
+  if (document.hidden && "Notification" in window && Notification.permission === "granted") {
+    try { new Notification(tr("timerDone") + " " + (h ? h.name : "")); } catch (e) {}
+  }
+  if (h) { const c = countOf(h, today()); if (c < h.target) setCount(h, c + 1); }
+  checkProgress(); save();
+  setTimeout(() => { $("tOverlay").hidden = true; $("tOverlay").classList.remove("fin"); }, 1500);
+}
+$("tPause").onclick = () => {
+  if (!timer) return;
+  if (timer.paused) { timer.end = Date.now() + timer.left; timer.paused = false; $("tPause").textContent = tr("tPause"); }
+  else { timer.left = timer.end - Date.now(); timer.paused = true; $("tPause").textContent = tr("tResume"); }
+};
+$("tStop").onclick = () => { timer = null; clearInterval(timerLoop); $("tOverlay").hidden = true; };
+
+// ---------- 13. Drag to reorder (hold ⋮⋮ and move) ----------
+function initDrag(grip, row, list) {
+  grip.addEventListener("pointerdown", e => {
+    e.preventDefault(); grip.setPointerCapture(e.pointerId); row.classList.add("dragging");
+    const move = ev => {
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const over = el && el.closest(".item");
+      if (!over || over === row || over.parentNode !== list) return;
+      const r = over.getBoundingClientRect();
+      list.insertBefore(row, ev.clientY < r.top + r.height / 2 ? over : over.nextSibling);
+    };
+    const up = () => {
+      grip.removeEventListener("pointermove", move); grip.removeEventListener("pointerup", up); grip.removeEventListener("pointercancel", up);
+      row.classList.remove("dragging");
+      [...list.querySelectorAll(".item")].forEach((el, i) => { const h = state.habits.find(x => x.id === el.dataset.id); if (h) h.order = i; });
+      save(); render();
+    };
+    grip.addEventListener("pointermove", move); grip.addEventListener("pointerup", up); grip.addEventListener("pointercancel", up);
+  });
+}
+
+// ---------- 14. Add / edit sheet ----------
+let editing = null;
+function openDialog(h) {
+  editing = h || null;
+  const v = h || { name: "", time: "", part: "day", minutes: 5, coins: 1, target: 1, days: ALL_DAYS };
+  $("dlgTitle").textContent = tr(h ? "dlgEdit" : "dlgNew");
+  $("fName").value = v.name; $("fTime").value = v.time; $("fPart").value = v.part;
+  $("fMin").value = v.minutes; $("fCoins").value = v.coins; $("fTarget").value = v.target;
+  $("dlgDel").hidden = !h;
+  const pick = $("dayPick"); pick.innerHTML = "";
+  for (const d of [1,2,3,4,5,6,0]) {          // Monday first
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.d = d; b.textContent = DAYS_SHORT[state.lang][d];
+    b.setAttribute("aria-pressed", v.days.includes(d));
+    b.onclick = () => b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+    pick.appendChild(b);
+  }
+  $("dlg").showModal();
+}
+$("fTime").onchange = () => { if ($("fTime").value) $("fPart").value = partFromTime($("fTime").value); };
+$("dlgForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("fName").value.trim();
+  if (!name) { $("fName").focus(); restart($("fName"), "shake"); return; }
+  if (hasHabit(name, editing)) { alert(tr("dup", name)); return; }
+  const days = [...$("dayPick").children].filter(b => b.getAttribute("aria-pressed") === "true").map(b => +b.dataset.d);
+  if (!days.length) { alert(tr("needDay")); return; }
+  const v = { name, time: $("fTime").value, part: $("fPart").value, days,
+    minutes: Math.max(0, Math.min(600, +$("fMin").value || 0)),
+    coins: Math.max(1, Math.min(100, +$("fCoins").value || 1)),
+    target: Math.max(1, Math.min(50, +$("fTarget").value || 1)) };
+  if (editing) {
+    const h = editing, d = today();
+    const moved = h.time !== v.time || h.part !== v.part;
+    if (v.target !== h.target) {
+      const was = isDone(h.id, d), c = countOf(h, d);
+      (state.counts[d] || (state.counts[d] = {}))[h.id] = was ? v.target : Math.min(c, v.target - 1);
+    }
+    Object.assign(h, v); if (moved) placeByTime(h);
+  } else addHabit(v);
+  const id = editing ? editing.id : state.habits[state.habits.length - 1].id;
+  const isNew = !editing;
+  $("dlg").close(); save(); render();
+  // show where it went: scroll to it and flash it
+  const row = document.querySelector(`.item[data-id="${id}"]`);
+  if (row) { row.scrollIntoView({ behavior: "smooth", block: "center" }); restart(row, "new"); }
+  if (isNew) toast(row ? tr("added", name) : tr("addedOff", name));
+});
+$("dlgCancel").onclick = () => $("dlg").close();
+$("dlgDel").onclick = () => {
+  if (!editing || !confirm(tr("delConfirm", editing.name))) return;
+  state.habits = state.habits.filter(x => x !== editing);
+  $("dlg").close(); save(); render();
+};
+$("newBtn").onclick = () => openDialog(null);
+
+// ---------- 15. Today page ----------
+let lastName = null;
+const lastStatus = {};
+function rowFor(h, d, list, ro) {
+  const c = countOf(h, d), done = c >= h.target, failed = isFailed(h.id, d), s = streakOf(h);
+  const row = document.createElement("div");
+  row.className = "item" + (done ? " done" : "") + (failed ? " failed" : ""); row.dataset.id = h.id;
+  const bits = [];
+  if (h.target > 1) bits.push(c + "/" + h.target);
+  bits.push("+" + h.coins);
+  if (h.minutes) bits.push(h.minutes + " " + tr("metaMin"));
+  const late = h.time && !done && !failed && new Date().toTimeString().slice(0, 5) > h.time;
+  let stKey = done ? "stDone" : failed ? "stFail" : late ? "stLate" : "stWait";
+  if (ro && !done && !failed) stKey = d > today() ? "stPlan" : state.rest[d] ? "stRest" : "stMissed";
+  const stCls = done ? "done" : failed ? "fail" : stKey === "stMissed" ? "fail" : stKey === "stPlan" ? "plan" : late && !ro ? "late" : "";
+  row.innerHTML = `
+    <span class="grip" aria-hidden="true">⋮⋮</span>
+    <div class="info">
+      <span class="t mono${h.time ? "" : " none"}">${h.time || "--:--"}</span>
+      <span class="who"><span class="nm"></span>${s > 1 ? `<span class="fire">🔥${s}</span>` : ""}<span class="meta">${bits.join(" / ")}</span></span>
+      <span class="st ${stCls}">${tr(stKey)}</span>
+    </div>
+    <div class="acts">${ro ? "" : `
+      ${h.minutes && !done && !failed ? `<button class="ib play" aria-label="Timer">▶</button>` : ""}
+      ${h.target > 1 && c > 0 && !done ? `<button class="ib minus" aria-label="-1">−</button>` : ""}
+      <button class="no" aria-pressed="${failed}"></button>
+      <button class="yes" aria-pressed="${done}">${h.target > 1 && !done ? "+1" : "✓"}</button>`}
+    </div>
+    <button class="ib edit" aria-label="Edit">✎</button>`;
+  row.querySelector(".nm").textContent = h.name;
+  const sk = h.id + d;
+  if (lastStatus[sk] && lastStatus[sk] !== stKey) restart(row.querySelector(".st"), "flip");
+  lastStatus[sk] = stKey;
+  row.querySelector(".edit").onclick = () => openDialog(h);
+  if (ro) { row.querySelector(".grip").style.visibility = "hidden"; return row; }
+  const yes = row.querySelector(".yes"), no = row.querySelector(".no");
+  yes.title = tr("yes"); yes.setAttribute("aria-label", tr("yes"));
+  no.title = tr("no"); no.setAttribute("aria-label", tr("no")); no.textContent = "✕";
+  yes.onclick = ev => setCount(h, done ? c - 1 : c + 1, ev);
+  no.onclick = ev => toggleFail(h, ev);
+  const m = row.querySelector(".minus"); if (m) m.onclick = ev => setCount(h, c - 1, ev);
+  const p = row.querySelector(".play"); if (p) p.onclick = () => startTimer(h);
+  initDrag(row.querySelector(".grip"), row, list);
+  return row;
+}
+// ---------- 15b. Tasks, day strip, reminders ----------
+let viewDay = today();
+function daysBetween(a, b) { return Math.round((toDate(b) - toDate(a)) / 86400000); }
+function dayLabel(dd) {
+  const t = today(), n = daysBetween(t, dd);
+  return n === 0 ? tr("today") : n === 1 ? tr("tomorrow") : n === -1 ? tr("yesterday") : fmtDate(dd);
+}
+function tasksFor(dd) {
+  const t = today();
+  return state.tasks.filter(x => x.date === dd || (dd === t && x.date < t && !x.done))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "99").localeCompare(b.time || "99")));
+}
+function renderStrip() {
+  const strip = $("strip"), t = today();
+  strip.innerHTML = "";
+  for (let i = -1; i <= 13; i++) {
+    const dd = addDays(t, i), b = document.createElement("button");
+    b.className = "dayBtn" + (dd === t ? " today" : "") + (dd < t ? " past" : "") + (dd === viewDay ? " sel" : "");
+    const wd = i === 0 ? tr("today") : i === 1 ? tr("tomorrow") : DAYS_SHORT[state.lang][weekday(dd)];
+    const open = tasksFor(dd).filter(x => !x.done).length;
+    b.innerHTML = `<span class="wd"></span><span class="dn">${toDate(dd).getDate()}</span>${open ? `<span class="dot">${open}</span>` : ""}`;
+    b.querySelector(".wd").textContent = wd;
+    b.onclick = () => { viewDay = dd; SFX.step(); render(); };
+    strip.appendChild(b);
+  }
+  $("jump").value = viewDay;
+  const sel = strip.querySelector(".sel");
+  if (sel) strip.scrollLeft = Math.max(0, sel.offsetLeft - strip.offsetLeft - 60);
+}
+$("jump").onchange = () => { if ($("jump").value) { viewDay = $("jump").value; render(); } };
+
+function taskRow(x) {
+  const t = today(), row = document.createElement("div");
+  row.className = "item" + (x.done ? " done" : ""); row.dataset.task = x.id;
+  const overdue = !x.done && x.date < t, lateNow = !x.done && x.date === t && x.time && new Date().toTimeString().slice(0, 5) > x.time;
+  const stKey = x.done ? "stDone" : overdue ? "stOverdue" : lateNow ? "stLate" : x.date > t ? "stPlan" : "stWait";
+  const stCls = x.done ? "done" : overdue ? "fail" : lateNow ? "late" : x.date > t ? "plan" : "";
+  const U = { uz: [" kun", "kuni"], en: ["d", "day of"], ru: [" дн.", "в день"] }[state.lang] || [" kun", "kuni"];
+  const rem = (x.remind || []).map(o => o ? o + U[0] : U[1]).join(" · ");
+  const meta = [overdue ? fmtDate(x.date) : "", x.coins ? "+" + x.coins : ""].filter(Boolean).join(" / ");
+  row.innerHTML = `
+    <span class="grip" aria-hidden="true" style="visibility:hidden">⋮⋮</span>
+    <div class="info">
+      <span class="t mono${x.time ? "" : " none"}">${x.time || "--:--"}</span>
+      <span class="who"><span class="nm"></span>${rem ? `<span class="bell">🔔 ${rem}</span>` : ""}${meta ? `<span class="meta">${meta}</span>` : ""}</span>
+      <span class="st ${stCls}">${tr(stKey)}</span>
+    </div>
+    <div class="acts"><button class="yes" aria-pressed="${x.done}">✓</button></div>
+    <button class="ib edit" aria-label="Edit">✎</button>`;
+  row.querySelector(".nm").textContent = x.name;
+  const yes = row.querySelector(".yes"); yes.title = tr("yes"); yes.setAttribute("aria-label", tr("yes"));
+  yes.onclick = ev => toggleTask(x, ev);
+  row.querySelector(".edit").onclick = () => openTask(x);
+  return row;
+}
+function toggleTask(x, ev) {
+  let amt;
+  if (x.done) { x.done = false; amt = -x.coins; if (x.coins) { addCoins(amt, tr("hTaskUndo") + x.name); state.xp = Math.max(0, state.xp - x.coins); } SFX.untick(); }
+  else { x.done = true; amt = x.coins; if (x.coins) { addCoins(amt, tr("hTask") + x.name); state.xp += x.coins; } SFX.tick(); buzz(30); restart($("hero"), "cut"); }
+  checkProgress(); save(); render();
+  restart(document.querySelector(`.item[data-task="${x.id}"]`), "pop");
+  if (amt && ev) floatCoins(ev.clientX, ev.clientY, amt);
+}
+
+// Task sheet
+let editingTask = null;
+const REM_OPTS = [3, 1, 0];
+function openTask(x) {
+  editingTask = x || null;
+  const v = x || { name: "", date: viewDay < today() ? today() : viewDay, time: "", coins: 1, remind: [1] };
+  $("tdlgTitle").textContent = tr(x ? "taskEdit" : "taskNew");
+  $("tName").value = v.name; $("tDate").value = v.date; $("tTime").value = v.time; $("tCoins").value = v.coins;
+  $("tdlgDel").hidden = !x;
+  const pick = $("remPick"); pick.innerHTML = "";
+  for (const o of REM_OPTS) {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.o = o; b.textContent = tr("r" + o);
+    b.setAttribute("aria-pressed", (v.remind || []).includes(o));
+    b.onclick = () => b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+    pick.appendChild(b);
+  }
+  $("tdlg").showModal();
+}
+$("tdlgForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("tName").value.trim();
+  if (!name) { $("tName").focus(); restart($("tName"), "shake"); return; }
+  if (!$("tDate").value) { alert(tr("needDate")); return; }
+  const remind = [...$("remPick").children].filter(b => b.getAttribute("aria-pressed") === "true").map(b => +b.dataset.o);
+  const v = { name, date: $("tDate").value, time: $("tTime").value, coins: Math.max(0, Math.min(100, +$("tCoins").value || 0)), remind };
+  let x = editingTask;
+  if (x) Object.assign(x, v);
+  else { x = Object.assign({ id: "t" + Date.now().toString(36), done: false, created: today() }, v); state.tasks.push(x); }
+  // reminders whose day has already passed are skipped; today's one fires right away
+  const left = daysBetween(today(), x.date);
+  for (const o of REM_OPTS) { const k = x.id + "|" + o; delete state.shownRem[k]; if (left < o) state.shownRem[k] = true; }
+  if (remind.length && "Notification" in window && Notification.permission === "default") { try { Notification.requestPermission(); } catch (er) {} }
+  $("tdlg").close();
+  viewDay = x.date < today() ? today() : x.date;
+  save(); render(); checkTaskReminders();
+  const row = document.querySelector(`.item[data-task="${x.id}"]`);
+  if (row) { row.scrollIntoView({ behavior: "smooth", block: "center" }); restart(row, "new"); }
+  if (!editingTask) toast(tr("added", name));
+});
+$("tdlgCancel").onclick = () => $("tdlg").close();
+$("tdlgDel").onclick = () => {
+  if (!editingTask || !confirm(tr("delConfirm", editingTask.name))) return;
+  state.tasks = state.tasks.filter(x => x !== editingTask);
+  $("tdlg").close(); save(); render();
+};
+$("newTaskBtn").onclick = () => openTask(null);
+
+// Reminders: 3 days before / 1 day before / on the day (at its time)
+function queueToast(msg) {
+  const wait = Math.max(0, toastAt - Date.now());
+  toast(msg); setTimeout(() => { SFX.alarm(); buzz([200, 100, 200]); }, wait);
+  if ("Notification" in window && Notification.permission === "granted") { try { new Notification(msg); } catch (e) {} }
+}
+function checkTaskReminders() {
+  const d = today(), now = new Date().toTimeString().slice(0, 5); let changed = false;
+  for (const x of state.tasks) {
+    if (state.taskRemind === false) return;
+    if (x.done || !x.remind || !x.remind.length || x.date < d) continue;
+    const left = daysBetween(d, x.date);
+    const due = x.remind.filter(o => left <= o && !state.shownRem[x.id + "|" + o] && (o > 0 || left > 0 || !x.time || now >= x.time));
+    if (!due.length) continue;
+    due.forEach(o => { state.shownRem[x.id + "|" + o] = true; }); changed = true;
+    queueToast(left === 0 ? tr("remToday", x.name, x.time ? " " + x.time : "") : left === 1 ? tr("remTomorrow", x.name) : tr("remIn", x.name, left));
+  }
+  if (changed) save();
+}
+
+function renderToday() {
+  const d = today(), rest = !!state.rest[d], neg = state.balance < 0;
+  const todays = state.habits.filter(h => scheduled(h, d));
+  const doneN = todays.filter(h => isDone(h.id, d)).length;
+
+  if (state.name !== lastName) { splitText($("greetName"), state.name || tr("friend")); splitText($("pName"), state.name || tr("friend")); lastName = state.name; }
+  rollNumber($("bal"), state.balance);
+  $("hero").classList.toggle("neg", neg); $("hero").classList.toggle("rest", rest);
+  $("lvlTag").textContent = "LVL " + levelOf(state.xp);
+  $("status").textContent = fmtDate(d) + "  ·  " + tr("doneOf", doneN, todays.length);
+
+  const ps = perfectStreak(), tag = $("streakTag");
+  if (rest) { tag.className = "streakTag lit"; tag.textContent = tr("restTag"); }
+  else if (ps) { tag.className = "streakTag lit"; tag.innerHTML = `<span class="fl">🔥</span> `; tag.append(tr("perfectRow", ps)); }
+  else { tag.className = "streakTag off"; tag.textContent = tr("startStreak"); }
+  $("restBtn").textContent = rest ? tr("restOff") : tr("restBtn");
+
+  $("segs").innerHTML = todays.map(h => `<span class="${isDone(h.id, d) ? "on" : isFailed(h.id, d) ? "x" : ""}"></span>`).join("");
+  const msg = rest ? tr("mRest") : neg ? tr("mNeg") : (todays.length && doneN === todays.length ? tr("mAll") : tr("mNorm"));
+  $("marqueeText").textContent = msg.repeat(6);
+  $("marquee").classList.toggle("neg", neg && !rest);
+
+  const vd = viewDay, ro = vd !== d;
+  renderStrip();
+  $("dayTitle").textContent = dayLabel(vd);
+  $("dayNote").textContent = vd > d ? tr("futureNote") : vd < d ? tr("pastNote") : "";
+
+  const tl = $("taskList"), tasks = tasksFor(vd); tl.innerHTML = "";
+  $("taskCount").textContent = tasks.filter(x => x.done).length + "/" + tasks.length;
+  if (!tasks.length) tl.innerHTML = `<p class="empty">${tr("noTasks")}</p>`;
+  for (const x of tasks) tl.appendChild(taskRow(x));
+
+  const dayHabits = state.habits.filter(h => scheduled(h, vd));
+  const box = $("sections"); box.innerHTML = "";
+  if (!state.habits.length) box.innerHTML = `<p class="empty">${tr("empty")}</p>`;
+  for (const part of PARTS) {
+    const hs = dayHabits.filter(h => h.part === part).sort((a, b) => a.order - b.order);
+    if (!hs.length) continue;
+    const head = document.createElement("div"); head.className = "sec mono";
+    head.innerHTML = `<span>${tr(part).toUpperCase()}</span><span>${hs.filter(h => isDone(h.id, vd)).length}/${hs.length}</span>`;
+    const list = document.createElement("div"); list.className = "list";
+    for (const h of hs) list.appendChild(rowFor(h, vd, list, ro));
+    box.append(head, list);
+  }
+
+  const off = state.habits.filter(h => !scheduled(h, vd) && h.created <= vd);
+  const offBox = $("offList"); offBox.innerHTML = "";
+  if (off.length) {
+    offBox.append(tr("notToday"));
+    for (const h of off) {
+      const b = document.createElement("button"); b.className = "chip small"; b.textContent = h.name;
+      b.onclick = () => openDialog(h); offBox.appendChild(b);
+    }
+  }
+
+
+  const j = state.journal[d] || {};
+  [...$("moods").children].forEach((b, i) => b.setAttribute("aria-pressed", j.mood === i + 1));
+  if (document.activeElement !== $("note")) $("note").value = j.text || "";
+}
+[...$("moods").children].forEach((b, i) => {
+  b.onclick = () => {
+    const j = state.journal[today()] || (state.journal[today()] = {});
+    j.mood = j.mood === i + 1 ? 0 : i + 1;
+    SFX.step(); checkProgress(); save(); render();
+  };
+});
+$("note").addEventListener("input", () => {
+  (state.journal[today()] || (state.journal[today()] = {})).text = $("note").value;
+  checkProgress(); save();
+});
+$("restBtn").onclick = () => {
+  const d = today();
+  if (state.rest[d]) delete state.rest[d];
+  else { if (!confirm(tr("restConfirm"))) return; state.rest[d] = true; }
+  checkProgress(); save(); render();
+};
+
+// ---------- 16. Profile page ----------
+function dayScore(d) {
+  if (state.rest[d]) return { rest: true };
+  const hs = state.habits.filter(h => scheduled(h, d));
+  if (!hs.length) return null;
+  return { total: hs.length, done: hs.filter(h => isDone(h.id, d)).length };
+}
+let selCell = null;
+function renderHeat() {
+  const wrap = $("heat"); wrap.innerHTML = "";
+  const t = today(), mon = (weekday(t) + 6) % 7;      // 0 = Monday
+  const start = addDays(t, -(19 * 7 + mon));
+  for (let w = 0; w < 20; w++) {
+    const col = document.createElement("div"); col.className = "hcol";
+    for (let r = 0; r < 7; r++) {
+      const d = addDays(start, w * 7 + r), c = document.createElement("button");
+      c.className = "hc"; c.setAttribute("aria-label", d);
+      if (d > t) { c.className += " future"; c.disabled = true; }
+      else {
+        const s = dayScore(d);
+        if (!s) c.className += " none";
+        else if (s.rest) c.className += " rest";
+        else {
+          const pct = Math.round(100 * s.done / s.total);
+          c.style.background = pct ? `color-mix(in srgb, var(--lime) ${25 + pct * .75}%, var(--line))`
+            : (d < t ? "color-mix(in srgb, var(--orange) 45%, var(--line))" : "");
+        }
+        if (d === selCell) c.classList.add("sel");
+        c.onclick = () => { selCell = d; renderHeat(); };
+      }
+      col.appendChild(c);
+    }
+    wrap.appendChild(col);
+  }
+  if (!selCell) { $("heatInfo").textContent = tr("calTap"); return; }
+  const s = dayScore(selCell), j = state.journal[selCell] || {};
+  let info = fmtDate(selCell) + ": " + (!s ? tr("calNone") : s.rest ? tr("calRest") : s.done + "/" + s.total);
+  if (j.mood) info += "  " + ["😞","😕","😐","🙂","😄"][j.mood - 1];
+  if (j.text) info += "  " + j.text;
+  $("heatInfo").textContent = info;
+}
+function renderReport() {
+  const t = today(); let tot = 0, ok = 0; const miss = {}, cnt = {}, got = {};
+  for (let i = 7; i >= 1; i--) {
+    const d = addDays(t, -i); if (state.rest[d]) continue;
+    for (const h of state.habits) {
+      if (!scheduled(h, d)) continue;
+      tot++; cnt[h.id] = (cnt[h.id] || 0) + 1;
+      if (isDone(h.id, d)) { ok++; got[h.id] = (got[h.id] || 0) + 1; } else miss[h.id] = (miss[h.id] || 0) + 1;
+    }
+  }
+  const box = $("report");
+  if (!tot) { box.textContent = tr("noData"); return; }
+  const from = addDays(t, -7); let earned = 0, lost = 0;
+  for (const e of state.history) if (e.date >= from && e.date < t) { if (e.amount > 0) earned += e.amount; else lost -= e.amount; }
+  const name = id => (state.habits.find(h => h.id === id) || {}).name || "";
+  const worst = Object.entries(miss).sort((a, b) => b[1] - a[1])[0];
+  const steady = Object.keys(cnt).filter(id => cnt[id] >= 3).sort((a, b) => (got[b] || 0) / cnt[b] - (got[a] || 0) / cnt[a])[0];
+  box.innerHTML = `<div class="pct">${Math.round(100 * ok / tot)}%<em></em></div><p class="mono e1"></p><p class="mono e2"></p><p class="w"></p><p class="s"></p>`;
+  box.querySelector(".pct em").textContent = tr("weekDone");
+  box.querySelector(".e1").textContent = tr("earned", earned);
+  box.querySelector(".e2").textContent = tr("lost", lost);
+  box.querySelector(".w").textContent = worst ? tr("mostMissed", name(worst[0]), worst[1]) : "";
+  box.querySelector(".s").textContent = steady ? tr("bestH", name(steady)) : "";
+}
+function habitPct(h) {
+  const t = today(); let ok = 0, n = 0;
+  for (let i = 29; i >= 0; i--) {
+    const d = addDays(t, -i);
+    if (state.rest[d] || !scheduled(h, d)) continue;
+    if (d === t && !isDone(h.id, d)) continue;   // today isn't over yet
+    n++; if (isDone(h.id, d)) ok++;
+  }
+  return n ? Math.round(100 * ok / n) : null;
+}
+function renderProfile() {
+  const lvl = levelOf(state.xp), lo = xpFor(lvl), hi = xpFor(lvl + 1);
+  paintAva($("avatar"));
+  $("stBal").textContent = state.balance; $("stBal").style.color = state.balance < 0 ? "var(--orange)" : "";
+  $("stLvl").textContent = lvl; $("stBest").textContent = state.best || 0;
+  $("stDays").textContent = Object.values(state.done).filter(a => a.length).length;
+  $("lvlBar").style.width = (100 * (state.xp - lo) / (hi - lo)) + "%";
+  $("lvlText").textContent = tr("levelProg", state.xp, hi - state.xp);
+
+  renderReport(); renderHeat();
+
+  const bars = $("bars"); bars.innerHTML = "";
+  for (const h of [...state.habits].sort((a, b) => (habitPct(b) ?? -1) - (habitPct(a) ?? -1))) {
+    const p = habitPct(h), el = document.createElement("div");
+    el.className = "bar";
+    el.innerHTML = `<div class="top"><span></span><span class="mono">${p === null ? "--" : p + "%"}</span></div><div class="track"><i style="width:${p || 0}%"></i></div>`;
+    el.querySelector(".top span").textContent = h.name;
+    bars.appendChild(el);
+  }
+
+  const bg = $("badges"); bg.innerHTML = "";
+  for (const b of BADGES) {
+    const el = document.createElement("div");
+    el.className = "badge" + (state.badges[b.id] ? " got" : "");
+    el.innerHTML = `<span class="ic">${b.ic}</span><span class="bn"></span>`;
+    el.querySelector(".bn").textContent = b[state.lang] || b.uz;
+    bg.appendChild(el);
+  }
+
+  $("sMult").value = state.mult; $("sTheme").value = state.theme; $("sLang").value = state.lang;
+  renderAccount();
+
+  const log = $("log"); log.innerHTML = state.history.length ? "" : `<li class="empty">${tr("nothing")}</li>`;
+  for (const e of state.history.slice(0, 30)) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="d mono"></span><span class="x"></span><span class="p ${e.amount > 0 ? "plus" : "minus"}">${e.amount > 0 ? "+" : ""}${e.amount}</span>`;
+    li.querySelector(".d").textContent = e.date.slice(5).replace("-", ".");
+    li.querySelector(".x").textContent = e.text;
+    log.appendChild(li);
+  }
+}
+// Day / night
+function isDark() {
+  if (state.theme === "dark") return true;
+  if (state.theme === "light") return false;
+  if (state.theme === "time") { const h = new Date().getHours(); return h >= 19 || h < 7; }
+  return matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function applyTheme() {
+  const want = state.theme === "auto" ? "" : (isDark() ? "dark" : "light");
+  if (document.documentElement.dataset.theme !== want) document.documentElement.dataset.theme = want;
+  $("themeBtn").textContent = isDark() ? "☀" : "☾";
+}
+$("themeBtn").onclick = () => { state.theme = isDark() ? "light" : "dark"; save(); render(); };
+function applyLang() {
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = tr(el.dataset.t); });
+  document.querySelectorAll("[data-tp]").forEach(el => { el.placeholder = tr(el.dataset.tp); });
+}
+function render() {
+  renderToday(); renderProfile(); renderPR();
+  applyTheme();
+}
+
+// ---------- 16a. Personal records (gym) ----------
+// Strength standards as multiples of body weight (rough guide): Bronze, Silver, Gold, Platinum, Diamond.
+// Pull-ups are ranked by reps instead.
+const LIFTS = [
+  { id: "bench",    m: [0.5, 0.75, 1.0, 1.5, 2.0],   f: [0.25, 0.5, 0.75, 1.0, 1.4] },
+  { id: "squat",    m: [0.75, 1.25, 1.5, 2.25, 2.75], f: [0.5, 0.75, 1.25, 1.75, 2.25] },
+  { id: "deadlift", m: [1.0, 1.5, 2.0, 2.5, 3.0],    f: [0.5, 1.0, 1.5, 2.0, 2.5] },
+  { id: "ohp",      m: [0.35, 0.55, 0.75, 1.0, 1.35], f: [0.2, 0.35, 0.5, 0.75, 1.0] },
+  { id: "row",      m: [0.4, 0.65, 0.9, 1.2, 1.5],   f: [0.25, 0.4, 0.65, 0.9, 1.15] },
+  { id: "pullup",   reps: true, m: [1, 5, 12, 20, 30], f: [1, 3, 8, 14, 20] }
+];
+const RANK_IC = ["🌱", "🥉", "🥈", "🥇", "💠", "💎"];
+const kg = n => (Math.round(n * 10) / 10).toString();
+const e1rm = (w, r) => r <= 1 ? w : w * (1 + r / 30);           // Epley
+function exName(id) { const c = state.customEx.find(x => x.id === id); return c ? c.name : tr("ex_" + id); }
+function liftOf(id) { return LIFTS.find(l => l.id === id); }
+// value used for ranking: estimated 1RM, or max reps for pull-ups
+function setValue(id, x) { return liftOf(id) && liftOf(id).reps ? x.r : e1rm(x.w, x.r); }
+function bestSet(id) {
+  const list = state.lifts[id] || []; let best = null, bv = -1;
+  for (const x of list) { const v = setValue(id, x); if (v > bv || (v === bv && x.w > best.w)) { bv = v; best = x; } }
+  return best ? { set: best, value: bv } : null;
+}
+// rank level 0..5 plus a 0..1 progress towards the next one
+function rankOf(id, value) {
+  const L = liftOf(id); if (!L || !state.body) return null;
+  const t = L[state.body.sex === "f" ? "f" : "m"], ratio = L.reps ? value : value / state.body.weight;
+  let lvl = 0; while (lvl < 5 && ratio >= t[lvl]) lvl++;
+  const lo = lvl ? t[lvl - 1] : 0, hi = lvl < 5 ? t[lvl] : null;
+  const frac = hi === null ? 0 : Math.max(0, Math.min(1, (ratio - lo) / (hi - lo)));
+  const need = hi === null ? 0 : (L.reps ? Math.ceil(hi - ratio) : hi * state.body.weight - value);
+  return { lvl, frac, score: Math.min(5, lvl + frac), ratio, need };
+}
+function overallRank() {
+  const scores = LIFTS.map(L => { const b = bestSet(L.id); return b ? rankOf(L.id, b.value) : null; }).filter(Boolean);
+  if (!scores.length) return null;
+  const avg = scores.reduce((a, r) => a + r.score, 0) / scores.length;
+  const lvl = Math.min(5, Math.floor(avg));
+  return { lvl, avg, points: Math.round(avg / 5 * 100), frac: avg - lvl };
+}
+function bmiInfo() {
+  const b = state.body; if (!b || !b.height) return null;
+  const v = b.weight / Math.pow(b.height / 100, 2);
+  return { v: v.toFixed(1), cat: tr(v < 18.5 ? "bmiU" : v < 25 ? "bmiN" : v < 30 ? "bmiO" : "bmiOb") };
+}
+let bodyEditing = false, bodySex = "m";
+function paintSex() { [...$("bSex").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.v === bodySex)); }
+[...$("bSex").children].forEach(b => b.onclick = () => { bodySex = b.dataset.v; paintSex(); });
+$("bodyEdit").onclick = () => { bodyEditing = true; renderPR(); };
+$("bodyCancel").onclick = () => { bodyEditing = false; renderPR(); };
+$("bodySave").onclick = () => {
+  const w = +$("bWeight").value, h = +$("bHeight").value;
+  if (!(w >= 25 && w <= 300 && h >= 100 && h <= 250)) { $("bodyErr").textContent = tr("bodyBad"); return; }
+  $("bodyErr").textContent = "";
+  state.body = { weight: w, height: h, sex: bodySex }; bodyEditing = false;
+  save(); render(); toast(tr("saved"));
+};
+$("sEx").onchange = () => {
+  const v = $("sEx").value, L = liftOf(v);
+  $("newExWrap").hidden = v !== "__new";
+  $("sWLabel").textContent = tr(L && L.reps ? "extraKg" : "weightKg");
+  $("sW").placeholder = L && L.reps ? "0" : "60";
+};
+$("setSave").onclick = () => {
+  const err = $("setErr"); err.textContent = "";
+  let id = $("sEx").value;
+  const L = liftOf(id), w = +($("sW").value || 0), r = Math.round(+$("sR").value);
+  if (!(r >= 1 && r <= 100) || w < 0 || (!L || !L.reps) && !(w > 0) || w > 1000) { err.textContent = tr("setBad"); return; }
+  if (id === "__new") {
+    const name = $("sNewEx").value.trim(); if (!name) { err.textContent = tr("needExName"); $("sNewEx").focus(); return; }
+    const found = state.customEx.find(x => x.name.toLowerCase() === name.toLowerCase());
+    id = found ? found.id : "c" + Date.now().toString(36);
+    if (!found) state.customEx.push({ id, name });
+    $("sNewEx").value = "";
+  }
+  const x = { id: "s" + Date.now().toString(36), date: $("sDate").value || today(), w, r };
+  (state.lifts[id] || (state.lifts[id] = [])).push(x);
+  const v = setValue(id, x), prev = state.prBest[id];
+  if (prev !== undefined && v > prev + 1e-9) {        // beat the best ever: celebrate + coins
+    addCoins(5, tr("prCoins") + exName(id)); state.xp += 5;
+    burst("🏆", tr("newPR") + " " + exName(id) + ": " + (L && L.reps ? r + " " + tr("repsUnit") : kg(w) + " × " + r));
+  } else toast(tr("saved"));
+  if (prev === undefined || v > prev) state.prBest[id] = v;
+  $("sW").value = ""; $("sR").value = "";
+  lastEx = id;
+  checkProgress(); save(); render();
+};
+let lastEx = "bench";
+function delSet(id, sid) {
+  if (!confirm(tr("delSet"))) return;
+  state.lifts[id] = (state.lifts[id] || []).filter(x => x.id !== sid);
+  save(); render();
+}
+function renderPR() {
+  const needBody = !state.body || bodyEditing;
+  $("prSetup").hidden = !needBody; $("prMain").hidden = !state.body;
+  $("bodyCancel").hidden = !state.body;
+  if (needBody && document.activeElement !== $("bWeight") && document.activeElement !== $("bHeight")) {
+    $("bWeight").value = state.body ? state.body.weight : ""; $("bHeight").value = state.body ? state.body.height : "";
+    bodySex = state.body ? state.body.sex : bodySex; paintSex();
+  }
+  // profile chip
+  const ov = state.body ? overallRank() : null, chip = $("accRank");
+  chip.hidden = !ov;
+  if (ov) chip.textContent = RANK_IC[ov.lvl] + " " + tr("rk" + ov.lvl) + " · " + tr("score", ov.points);
+  if (!state.body) return;
+
+  // overall card
+  $("rankIcon").textContent = ov ? RANK_IC[ov.lvl] : "🌱";
+  $("rankName").textContent = ov ? tr("rk" + ov.lvl) : tr("rankNone");
+  $("rankScore").textContent = ov ? tr("score", ov.points) : tr("rankNoneSub");
+  $("rankBar").style.width = ov ? (ov.lvl >= 5 ? 100 : ov.frac * 100) + "%" : "0%";
+  $("rankNext").textContent = ov ? (ov.lvl >= 5 ? tr("maxRank") : tr("nextOverall", RANK_IC[ov.lvl + 1] + " " + tr("rk" + (ov.lvl + 1)))) : "";
+  const b = state.body, bm = bmiInfo();
+  $("bodyLine").textContent = kg(b.weight) + " kg · " + b.height + " cm · " + tr(b.sex === "f" ? "female" : "male");
+  $("bmiLine").textContent = bm ? tr("bmi", bm.v, bm.cat) : "";
+
+  // exercise menu
+  const sel = $("sEx"), keep = sel.value || lastEx;
+  sel.innerHTML = "";
+  for (const L of LIFTS) sel.add(new Option(exName(L.id), L.id));
+  for (const c of state.customEx) sel.add(new Option(c.name, c.id));
+  sel.add(new Option(tr("newEx"), "__new"));
+  sel.value = [...sel.options].some(o => o.value === lastEx) ? lastEx : keep;
+  if (!sel.value) sel.value = "bench";
+  $("sEx").onchange();
+  if (!$("sDate").value) $("sDate").value = today();
+
+  // one card per exercise
+  const grid = $("liftGrid"); grid.innerHTML = "";
+  const ids = [...LIFTS.map(L => L.id), ...state.customEx.map(c => c.id)];
+  for (const id of ids) {
+    const L = liftOf(id), bs = bestSet(id), list = (state.lifts[id] || []).slice().sort((a, c) => c.date.localeCompare(a.date) || c.id.localeCompare(a.id));
+    if (!L && !list.length) continue;
+    const rk = bs && L ? rankOf(id, bs.value) : null;
+    const card = document.createElement("div"); card.className = "card lift" + (rk ? " r" + rk.lvl : "");
+    const bestTxt = bs ? (L && L.reps ? bs.set.r + " " + tr("repsUnit") + (bs.set.w ? " +" + kg(bs.set.w) + " kg" : "") : kg(bs.set.w) + " kg × " + bs.set.r) : "";
+    let lines = "";
+    if (bs && L && !L.reps) lines += `<span>${tr("e1rm", kg(bs.value))}</span><span>${tr("ratio", (bs.value / b.weight).toFixed(2))}</span>`;
+    else if (bs && !L) lines += `<span>${tr("e1rm", kg(bs.value))}</span>`;
+    const next = rk ? (rk.lvl >= 5 ? tr("maxRank") : tr("toNext", RANK_IC[rk.lvl + 1] + " " + tr("rk" + (rk.lvl + 1)), L.reps ? rk.need + " " + tr("repsUnit") : kg(rk.need) + " kg 1RM")) : "";
+    card.innerHTML = `
+      <div class="liftHead"><h3></h3>${rk ? `<span class="rk">${RANK_IC[rk.lvl]} ${tr("rk" + rk.lvl)}</span>` : (L ? "" : `<span class="rk muted">${tr("unranked")}</span>`)}</div>
+      <div class="liftBest">${bs ? tr("best", "<b>" + bestTxt + "</b>") : `<span class="note">${tr("noSets")}</span>`}</div>
+      ${lines ? `<div class="liftLines">${lines}</div>` : ""}
+      ${rk ? `<div class="lvlbar"><i style="width:${rk.lvl >= 5 ? 100 : rk.frac * 100}%"></i></div><p class="note">${next}</p>` : ""}
+      <ul class="sets"></ul>`;
+    card.querySelector("h3").textContent = exName(id);
+    const ul = card.querySelector(".sets");
+    for (const x of list.slice(0, 5)) {
+      const li = document.createElement("li");
+      const isBest = bs && x === bs.set;
+      li.innerHTML = `<span class="d">${fmtShort(x.date)}</span><span class="v">${L && L.reps ? x.r + " " + tr("repsUnit") + (x.w ? " +" + kg(x.w) + " kg" : "") : kg(x.w) + " × " + x.r}${isBest ? " 🏆" : ""}</span><button class="ib" aria-label="Delete">✕</button>`;
+      li.querySelector("button").onclick = () => delSet(id, x.id);
+      ul.appendChild(li);
+    }
+    grid.appendChild(card);
+  }
+}
+
+// ---------- 16b. Profile / account ----------
+function fullName() { return (state.name + " " + (state.lastName || "")).trim() || tr("friend"); }
+function paintAva(el) {
+  if (!el) return;
+  if (state.photo) { el.style.backgroundImage = `url(${state.photo})`; el.textContent = ""; el.classList.add("img"); }
+  else { el.style.backgroundImage = ""; el.textContent = state.emoji || "🙂"; el.classList.remove("img"); }
+}
+function fmtPhone(v) {      // +998 90 123 45 67
+  let d = v.replace(/\D/g, "");
+  if (d.startsWith("998")) d = d.slice(3);
+  d = d.slice(0, 9);
+  const parts = [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean);
+  return d ? "+998 " + parts.join(" ") : "";
+}
+let savedT = null;
+function savedFlash() {
+  const n = $("savedNote"); n.textContent = tr("saved"); n.classList.remove("on"); void n.offsetWidth; n.classList.add("on");
+  clearTimeout(savedT); savedT = setTimeout(() => { n.textContent = ""; }, 1800);
+}
+function permText() {
+  if (!("Notification" in window)) return tr("permNone");
+  return { granted: tr("permGranted"), denied: tr("permDenied") }[Notification.permission] || tr("permDefault");
+}
+function renderAccount() {
+  paintAcct();
+  paintAva($("accAva")); paintAva($("accAva2")); paintAva($("hudAva"));
+  $("accName").textContent = fullName();
+  const first = state.habits.reduce((m, h) => h.created < m ? h.created : m, today());
+  const bits = [tr("memberSince", fmtShort(first)), "LVL " + levelOf(state.xp)];
+  if (state.phone) bits.push(state.phone);
+  $("accSub").textContent = bits.join("  ·  ");
+  $("accGoal").textContent = state.goal ? "“" + state.goal + "”" : "";
+  $("photoDel").hidden = !state.photo;
+  const set = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v || ""; };
+  set("fFirst", state.name); set("fLast", state.lastName); set("fPhone", state.phone); set("fEmail", state.email);
+  set("fBirth", state.birth); set("fGoal", state.goal); set("sEmoji", state.emoji); set("sBonus", bonus());
+  $("passState").textContent = state.pass ? tr("passOn") : tr("passOff");
+  $("curWrap").hidden = !state.pass; $("passRemove").hidden = !state.pass; $("lockNow").hidden = !state.pass;
+  $("passSave").textContent = state.pass ? tr("changePass") : tr("setPass");
+  $("autoLock").value = String(state.autoLock || 0); $("autoLock").disabled = !state.pass;
+  $("nRoutine").checked = !!state.remind; $("nTasks").checked = state.taskRemind !== false;
+  $("nMorning").checked = !!state.morning; $("nMorningT").value = state.morning || "07:30";
+  $("nEvening").checked = !!state.evening; $("nEveningT").value = state.evening || "21:00";
+  $("nSound").checked = !!state.sound; $("nVibe").checked = state.vibe !== false;
+  $("permState").textContent = permText();
+  $("askPerm").hidden = !("Notification" in window) || Notification.permission !== "default";
+}
+// personal info: saves as you type
+$("fFirst").oninput = () => { state.name = $("fFirst").value.trim(); save(); render(); savedFlash(); };
+$("fLast").oninput = () => { state.lastName = $("fLast").value.trim(); save(); renderAccount(); savedFlash(); };
+$("fGoal").oninput = () => { state.goal = $("fGoal").value.trim(); save(); renderAccount(); savedFlash(); };
+$("fBirth").onchange = () => { state.birth = $("fBirth").value; save(); savedFlash(); };
+$("fPhone").oninput = () => { const v = fmtPhone($("fPhone").value); $("fPhone").value = v; };
+$("fPhone").onblur = () => {
+  const v = $("fPhone").value, ok = !v || v.replace(/\D/g, "").length === 12;
+  $("phoneErr").textContent = ok ? "" : tr("phoneBad");
+  if (ok) { state.phone = v; save(); renderAccount(); savedFlash(); }
+};
+$("fEmail").onblur = () => {
+  const v = $("fEmail").value.trim(), ok = !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  $("emailErr").textContent = ok ? "" : tr("emailBad");
+  if (ok) { state.email = v; save(); savedFlash(); }
+};
+// photo: shrunk to 256px so it fits in storage
+$("photoBtn").onclick = () => $("photoFile").click();
+$("photoFile").onchange = () => {
+  const f = $("photoFile").files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement("canvas"), S = 256; c.width = c.height = S;
+    const k = Math.max(S / img.width, S / img.height), w = img.width * k, h = img.height * k;
+    c.getContext("2d").drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+    state.photo = c.toDataURL("image/jpeg", .85); save(); render(); savedFlash(); URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f); $("photoFile").value = "";
+};
+$("photoDel").onclick = () => { state.photo = ""; save(); render(); };
+
+// password (stored only as a salted SHA-256 hash)
+async function hashPass(pw, salt) {
+  try {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + ":" + pw));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (e) {   // very old browsers: simple fallback hash
+    let h = 5381; for (const ch of salt + pw) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return "f" + (h >>> 0).toString(16);
+  }
+}
+async function checkPass(pw) { return !!state.pass && (await hashPass(pw, state.pass.salt)) === state.pass.hash; }
+$("passSave").onclick = async () => {
+  const err = $("passErr"); err.textContent = "";
+  if (state.pass && !(await checkPass($("pCur").value))) { err.textContent = tr("passWrong"); restart($("pCur"), "shake"); return; }
+  const a = $("pNew").value, b = $("pNew2").value;
+  if (a.length < 4) { err.textContent = tr("passShort"); restart($("pNew"), "shake"); return; }
+  if (a !== b) { err.textContent = tr("passMismatch"); restart($("pNew2"), "shake"); return; }
+  const salt = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  state.pass = { salt, hash: await hashPass(a, salt) };
+  $("pCur").value = $("pNew").value = $("pNew2").value = "";
+  save(); renderAccount(); toast(tr("passSet"));
+};
+$("passRemove").onclick = async () => {
+  const err = $("passErr");
+  if (!(await checkPass($("pCur").value))) { err.textContent = tr("passWrong"); restart($("pCur"), "shake"); $("pCur").focus(); return; }
+  state.pass = null; state.autoLock = 0; $("pCur").value = ""; err.textContent = "";
+  save(); renderAccount(); toast(tr("passRemoved"));
+};
+$("autoLock").onchange = () => { state.autoLock = +$("autoLock").value; save(); };
+
+// lock screen
+function lockApp() {
+  if (!state.pass) return;
+  paintAva($("lockAva")); $("lockName").textContent = fullName();
+  $("lockErr").textContent = ""; $("lockPass").value = "";
+  $("lock").hidden = false; document.body.classList.add("locked");
+  setTimeout(() => $("lockPass").focus(), 50);
+}
+$("lockNow").onclick = lockApp;
+$("lockForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (await checkPass($("lockPass").value)) { $("lock").hidden = true; document.body.classList.remove("locked"); lastActive = Date.now(); SFX.tick(); }
+  else { $("lockErr").textContent = tr("passWrong"); restart($("lockPass"), "shake"); $("lockPass").select(); }
+});
+$("forgotBtn").onclick = () => {
+  if (!confirm(tr("forgotConfirm"))) return;
+  const keep = { lang: state.lang, theme: state.theme };
+  state = Object.assign(blankState(), keep); shownBal = null; lastName = null;
+  save(); location.reload();
+};
+let lastActive = Date.now();
+["pointerdown", "keydown", "scroll"].forEach(ev => addEventListener(ev, () => { lastActive = Date.now(); }, { passive: true }));
+function checkIdle() {
+  if (state.pass && state.autoLock && $("lock").hidden && Date.now() - lastActive > state.autoLock * 60000) lockApp();
+}
+
+// notifications
+$("nRoutine").onchange = () => { state.remind = $("nRoutine").checked; save(); askIfNeeded(); };
+$("nTasks").onchange = () => { state.taskRemind = $("nTasks").checked; save(); askIfNeeded(); };
+$("nMorning").onchange = $("nMorningT").onchange = () => { state.morning = $("nMorning").checked ? ($("nMorningT").value || "07:30") : ""; save(); };
+$("nEvening").onchange = $("nEveningT").onchange = () => { state.evening = $("nEvening").checked ? ($("nEveningT").value || "21:00") : ""; save(); };
+$("nSound").onchange = () => { state.sound = $("nSound").checked; save(); SFX.tick(); };
+$("nVibe").onchange = () => { state.vibe = $("nVibe").checked; save(); buzz(40); };
+function askIfNeeded() { if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission().then(renderAccount); } catch (e) {} } }
+$("askPerm").onclick = () => { try { Notification.requestPermission().then(renderAccount); } catch (e) {} };
+$("testNotif").onclick = () => queueToast(tr("testMsg"));
+$("sBonus").onchange = () => { state.bonus = Math.max(0, Math.min(100, +$("sBonus").value || 0)); save(); render(); };
+
+// morning plan / evening summary / birthday
+function checkSummaries() {
+  const d = today(), hm = new Date().toTimeString().slice(0, 5);
+  const hs = state.habits.filter(h => scheduled(h, d));
+  const ts = state.tasks.filter(x => x.date === d || (x.date < d && !x.done));
+  if (state.morning && hm >= state.morning && hm < "12:00" && !state.shownSum[d + "|m"]) {
+    state.shownSum[d + "|m"] = true; save(); queueToast(tr("morningMsg", hs.length, ts.length));
+  }
+  if (state.evening && hm >= state.evening && !state.shownSum[d + "|e"]) {
+    state.shownSum[d + "|e"] = true; save();
+    const lh = hs.filter(h => !isDone(h.id, d) && !isFailed(h.id, d)).length, lt = ts.filter(x => !x.done).length;
+    queueToast(lh || lt ? tr("eveningMsg", lh, lt) : tr("eveningAll"));
+  }
+  if (state.birth && state.birth.slice(5) === d.slice(5) && !state.shownSum[d + "|b"]) {
+    state.shownSum[d + "|b"] = true; save(); burst("🎂", tr("birthdayMsg", state.name));
+  }
+}
+
+// ---------- 17. Settings + backup ----------
+$("sEmoji").oninput = () => { state.emoji = $("sEmoji").value; save(); render(); savedFlash(); };
+$("sMult").onchange = () => { state.mult = +$("sMult").value; save(); render(); };
+$("sTheme").onchange = () => { state.theme = $("sTheme").value; save(); render(); };
+$("sLang").onchange = () => { state.lang = $("sLang").value; try { localStorage.setItem(KEY + ":lang", state.lang); } catch (e) {} lastName = null; save(); applyLang(); render(); };
+$("exportBtn").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }));
+  a.download = "routine-backup-" + today() + ".json"; a.click();
+};
+$("importBtn").onclick = () => $("importFile").click();
+$("importFile").onchange = async () => {
+  try {
+    const data = JSON.parse(await $("importFile").files[0].text());
+    if (!Array.isArray(data.habits)) throw 0;
+    state = Object.assign(blankState(), data); migrate(); shownBal = null; lastName = null;
+    save(); settle(); applyLang(); render(); alert(tr("importOk"));
+  } catch (e) { alert(tr("importBad")); }
+  $("importFile").value = "";
+};
+$("resetBtn").onclick = () => {
+  if (!confirm(tr("resetConfirm"))) return;
+  const keep = { lang: state.lang, theme: state.theme };
+  state = Object.assign(blankState(), keep); shownBal = null; lastName = null;
+  save(); settle(); render();
+};
+
+// ---------- 18. Upgrade older saved data ----------
+function migrate() {
+  for (const k of ["done", "failed", "counts", "rest", "journal", "badges", "shownRem", "shownSum", "lifts", "prBest"]) if (!state[k] || typeof state[k] !== "object") state[k] = {};
+  if (!Array.isArray(state.history)) state.history = [];
+  if (!Array.isArray(state.tasks)) state.tasks = [];
+  if (!Array.isArray(state.customEx)) state.customEx = [];
+  for (const h of state.habits) {
+    const b = BASICS.find(x => x.name === h.name);
+    if (!Array.isArray(h.days)) h.days = [...(b ? b.days : ALL_DAYS)];
+    if (!h.part) h.part = b ? b.part : partFromTime(h.time);
+    if (!h.target) h.target = b ? b.target : 1;
+    if (h.time === undefined) h.time = "";
+    if (h.minutes === undefined) h.minutes = 0;
+  }
+  if (state.habits.some(h => h.order === undefined)) {
+    [...state.habits].sort((a, b) => (a.time || "99").localeCompare(b.time || "99")).forEach((h, i) => { h.order = i; });
+  }
+  if (state.xp === undefined || state.xp === null) {
+    state.xp = Math.max(0, state.history.filter(e => !/^(Missed|O'tkazildi|Пропущено)/.test(e.text)).reduce((s, e) => s + e.amount, 0));
+  }
+  if (state.lvlSeen === undefined) state.lvlSeen = levelOf(state.xp);
+  if (!state.v2) { state.v2 = true; checkProgress(true); }   // award old achievements quietly
+  save();
+}
+
+// ---------- 19. Pages, clock, reminders, start ----------
+let firstShow = true;
+const PAGES = { today: "todayPage", pr: "prPage", stats: "statsPage", profile: "profilePage" };
+function showPage() {
+  const h = location.hash.slice(1), p = PAGES[h] ? h : "today";
+  const swap = () => {
+    for (const k in PAGES) $(PAGES[k]).hidden = k !== p;
+    $("navToday").classList.toggle("on", p === "today"); $("navPr").classList.toggle("on", p === "pr"); $("navStats").classList.toggle("on", p === "stats"); $("navProfile").classList.toggle("on", p === "profile");
+    lastName = null; render(); window.scrollTo(0, 0);
+  };
+  if (firstShow) { firstShow = false; swap(); return; }
+  restart($("wipe"), "go"); setTimeout(swap, 250);
+}
+window.addEventListener("hashchange", showPage);
+
+const reminded = new Set();
+let lastDay = today(), lastMinute = "";
+function checkReminders() {
+  if (!state.remind) return;
+  const now = new Date(), hm = now.toTimeString().slice(0, 5), d = today();
+  if (hm === lastMinute) return; lastMinute = hm;
+  if (state.rest[d]) return;
+  for (const h of state.habits) {
+    const key = d + "|" + h.id;
+    if (h.time === hm && scheduled(h, d) && !isDone(h.id, d) && !reminded.has(key)) {
+      reminded.add(key);
+      const msg = tr("remindTitle", h.name);
+      SFX.alarm(); buzz([200, 100, 200]); toast("⏰ " + msg);
+      if ("Notification" in window && Notification.permission === "granted") { try { new Notification(msg); } catch (e) {} }
+    }
+  }
+}
+setInterval(() => {
+  if (!appStarted) return;
+  setFlaps($("clock"), new Date().toTimeString().slice(0, 5)); applyTheme();
+  if (today() !== lastDay) { if (viewDay === lastDay) viewDay = today(); lastDay = today(); const lost = settle(); render(); if (lost) showPenalty(lost); }
+  checkReminders(); checkTaskReminders(); checkSummaries(); checkIdle();
+}, 1000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && appStarted) { const lost = settle(); render(); if (lost) showPenalty(lost); checkTaskReminders(); }
+});
+
+// ================================================================
+//  20. CLOUD: login + database (Firebase)
+//  Paste your own config from the Firebase console below.
+//  While it still says PASTE_..., the app works offline on this device only.
+// ================================================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyA6PWSfpOP3Qw9r_qOll5PzK9BGl0ifKJg",
+  authDomain: "routine-app-5de15.firebaseapp.com",
+  projectId: "routine-app-5de15",
+  storageBucket: "routine-app-5de15.firebasestorage.app",
+  messagingSenderId: "760535846258",
+  appId: "1:760535846258:web:eafe768b4beb26dd0a21eb",
+  measurementId: "G-950W658DJ2"
+};
+const cloud = { user: null, auth: null, db: null, unsub: null, pending: false, timer: null };
+const CLIENT_ID = Math.random().toString(36).slice(2);
+const configReady = () => !!FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith("PASTE");
+let localMode = false, appStarted = false;
+
+function setSync(st) {
+  const dot = $("syncDot"); dot.className = "rec " + st;
+  dot.title = tr({ ok: "syncOk", pending: "syncPending", err: "syncErr", off: "syncOff", local: "syncLocal" }[st]);
+}
+function userDoc() { return cloud.db.collection("users").doc(cloud.user.uid); }
+// Saves are bundled: at most one cloud write every 2 seconds (free plan = 20,000 writes a day)
+function scheduleCloud() {
+  cloud.pending = true; setSync("pending");
+  clearTimeout(cloud.timer); cloud.timer = setTimeout(pushCloud, 2000);
+}
+function pushCloud() {
+  if (!cloud.user) return;
+  clearTimeout(cloud.timer);
+  return userDoc().set({ data: JSON.stringify(state), updatedAt: Date.now(), client: CLIENT_ID })
+    .then(() => { cloud.pending = false; setSync("ok"); })
+    .catch(() => setSync(navigator.onLine ? "err" : "off"));
+}
+function flushCloud() { if (cloud.user && cloud.pending) pushCloud(); }
+addEventListener("pagehide", flushCloud);
+document.addEventListener("visibilitychange", () => { if (document.hidden) flushCloud(); });
+
+async function loadCloud(user) {
+  storeKey = KEY + ":" + user.uid;
+  try { localStorage.setItem(KEY + ":last", user.uid); localStorage.setItem(KEY + ":seen", "1"); } catch (e) {}
+  let snap = null;
+  try { snap = await userDoc().get(); } catch (e) {}
+  if (snap && snap.exists) {
+    state = Object.assign(blankState(), JSON.parse(snap.data().data));
+    setSync("ok");
+  } else if (snap) {                              // first time with this account
+    const local = readLocal(KEY);
+    const hasLocal = local && ((local.habits || []).length || (local.tasks || []).length);
+    state = hasLocal && confirm(tr("moveLocal")) ? Object.assign(blankState(), local) : blankState();
+    if (!state.email) state.email = user.email || "";
+    if (user.displayName) {
+      const [f, ...r] = user.displayName.split(" ");
+      if (!state.name) state.name = f;
+      if (!state.lastName) state.lastName = r.join(" ");
+    }
+    pushCloud();
+  } else {                                        // offline: use this device's copy
+    const c = readLocal(storeKey); if (c) state = Object.assign(blankState(), c);
+    setSync("off");
+  }
+  try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch (e) {}
+  // live updates from your other devices
+  if (cloud.unsub) cloud.unsub();
+  cloud.unsub = userDoc().onSnapshot(sn => {
+    if (!sn.exists || sn.metadata.hasPendingWrites) return;
+    const d = sn.data();
+    if (d.client === CLIENT_ID || cloud.pending) return;
+    state = Object.assign(blankState(), JSON.parse(d.data));
+    try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch (e) {}
+    if (appStarted) { migrate(); shownBal = null; lastName = null; settle(); applyLang(); render(); }
+    setSync("ok");
+  }, () => setSync("err"));
+}
+
+// ---------- login screen ----------
+// New visitors see "Create account" first; people who signed in here before see "Sign in"
+let authMode = localStorage.getItem(KEY + ":seen") ? "in" : "up";
+function authError(e) {
+  const c = (e && e.code) || "";
+  const map = { "auth/invalid-email": "e_email", "auth/user-not-found": "e_cred", "auth/wrong-password": "e_cred",
+    "auth/invalid-credential": "e_cred", "auth/invalid-login-credentials": "e_cred", "auth/email-already-in-use": "e_inuse",
+    "auth/weak-password": "e_weak", "auth/operation-not-supported-in-this-environment": "e_file", "auth/unauthorized-domain": "e_domain",
+    "auth/network-request-failed": "e_net", "auth/too-many-requests": "e_many", "auth/operation-not-allowed": "e_provider" };
+  if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") return;
+  $("authErr").textContent = map[c] ? tr(map[c]) : (e.message || c);
+}
+document.querySelectorAll("#authLang button").forEach(b => b.onclick = () => {
+  state.lang = b.dataset.l; try { localStorage.setItem(KEY + ":lang", state.lang); } catch (e) {}
+  applyLang(); paintAuth(); if (appStarted) render();
+});
+function paintAuth() {
+  document.querySelectorAll("#authLang button").forEach(b => b.classList.toggle("on", b.dataset.l === state.lang));
+  const up = authMode === "up";
+  $("authTitle").textContent = tr(up ? "authUp" : "authIn");
+  $("authSubmit").textContent = tr(up ? "submitUp" : "submitIn");
+  $("authToggle").textContent = tr(up ? "toIn" : "toUp");
+  $("aPass2").hidden = !up; $("authReset").hidden = up;
+  $("aPass").autocomplete = up ? "new-password" : "current-password";
+}
+function showAuth(loading) {
+  $("authLocal").hidden = true;          // with Firebase set up, everyone signs in
+  $("fileNote").hidden = location.protocol !== "file:";
+  $("auth").hidden = false; document.body.classList.add("authing");
+  $("authLoading").hidden = !loading; $("authMain").hidden = !!loading;
+  $("authErr").textContent = ""; $("authOk").textContent = ""; paintAuth();
+}
+function hideAuth() { $("auth").hidden = true; document.body.classList.remove("authing"); }
+$("authToggle").onclick = () => { authMode = authMode === "in" ? "up" : "in"; $("authErr").textContent = ""; paintAuth(); };
+$("gBtn").onclick = async () => {
+  $("authErr").textContent = "";
+  const prov = new firebase.auth.GoogleAuthProvider();
+  try { await cloud.auth.signInWithPopup(prov); }
+  catch (e) {
+    if (e.code === "auth/popup-blocked") { try { await cloud.auth.signInWithRedirect(prov); } catch (e2) { authError(e2); } }
+    else authError(e);
+  }
+};
+$("authForm").addEventListener("submit", async e => {
+  e.preventDefault(); $("authErr").textContent = ""; $("authOk").textContent = "";
+  const email = $("aEmail").value.trim(), pw = $("aPass").value;
+  if (authMode === "up" && pw !== $("aPass2").value) { $("authErr").textContent = tr("passMismatch"); return; }
+  $("authSubmit").disabled = true;
+  try {
+    if (authMode === "up") await cloud.auth.createUserWithEmailAndPassword(email, pw);
+    else await cloud.auth.signInWithEmailAndPassword(email, pw);
+  } catch (er) { authError(er); }
+  $("authSubmit").disabled = false;
+});
+$("authReset").onclick = async () => {
+  const email = $("aEmail").value.trim();
+  if (!email) { $("authErr").textContent = tr("needEmail"); $("aEmail").focus(); return; }
+  try { await cloud.auth.sendPasswordResetEmail(email); $("authErr").textContent = ""; $("authOk").textContent = tr("resetSent", email); }
+  catch (er) { authError(er); }
+};
+$("authLocal").onclick = () => {
+  localMode = true; storeKey = KEY; hideAuth();
+  const c = readLocal(KEY); state = Object.assign(blankState(), c || {});
+  setSync("local"); startApp();
+};
+// Sign out: save the last changes, forget this account on this device, back to the sign-in screen
+async function signOutNow() {
+  if (!cloud.user || !confirm(tr("signOutConfirm"))) return;
+  try { if (cloud.pending) await pushCloud(); } catch (e) {}
+  if (cloud.unsub) cloud.unsub();
+  try { localStorage.removeItem(KEY + ":last"); localStorage.removeItem(storeKey); } catch (e) {}
+  await cloud.auth.signOut();
+  location.reload();
+}
+$("signOutTop").onclick = signOutNow;
+$("acctBtn").onclick = () => { if (cloud.user) signOutNow(); else { localMode = false; showAuth(false); } };
+function paintAcct() {
+  $("acctWho").textContent = cloud.user ? (cloud.user.email || cloud.user.displayName || "") : tr("noAcct");
+  $("acctBtn").textContent = tr(cloud.user ? "signOut" : "signIn");
+  $("acctBtn").hidden = !cloud.user && !(configReady() && window.firebase);
+  $("signOutTop").hidden = !cloud.user;
+}
+
+// ---------- start ----------
+function startApp() {
+  if (appStarted) { migrate(); shownBal = null; lastName = null; settle(); applyLang(); render(); return; }
+  appStarted = true;
+  migrate(); applyLang();
+  if (state.pass) lockApp();
+  const lost = settle();
+  showPage();
+  if (lost) showPenalty(lost);
+  setTimeout(checkTaskReminders, lost ? 3400 : 900);
+}
+function boot() {
+  const savedLang = localStorage.getItem(KEY + ":lang");
+  if (!readLocal(storeKey) && !savedLang) {
+    const nav = (navigator.language || "uz").slice(0, 2);
+    state.lang = nav === "ru" ? "ru" : nav === "en" ? "en" : "uz";
+  } else if (savedLang && !readLocal(storeKey)) state.lang = savedLang;
+  applyLang(); applyTheme();
+  if (!configReady()) {                                              // Firebase not set up yet: banner, app stays usable
+    setSync("local");
+    if (sessionStorage.getItem("setupClosed") !== "1") $("setupBar").hidden = false;
+    $("setupMore").onclick = () => { $("setupSteps").hidden = !$("setupSteps").hidden; };
+    $("setupClose").onclick = () => { $("setupBar").hidden = true; try { sessionStorage.setItem("setupClosed", "1"); } catch (e) {} };
+    startApp(); return;
+  }
+  if (!window.firebase) {                                            // offline or blocked: last account's copy
+    const last = localStorage.getItem(KEY + ":last");
+    if (last) { storeKey = KEY + ":" + last; const c = readLocal(storeKey); if (c) state = Object.assign(blankState(), c); }
+    setSync("off"); startApp(); return;
+  }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  cloud.auth = firebase.auth(); cloud.db = firebase.firestore();
+  showAuth(true);
+  cloud.auth.onAuthStateChanged(async user => {
+    if (user) {
+      cloud.user = user; showAuth(true);
+      await loadCloud(user);
+      hideAuth(); startApp();
+    } else {
+      cloud.user = null;
+      if (!localMode) showAuth(false);
+    }
+  });
+}
+boot();
+</script>
+</body>
+</html>
