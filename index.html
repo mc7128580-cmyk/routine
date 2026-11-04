@@ -380,6 +380,60 @@ body.locked main, body.locked nav, body.locked .hud { visibility: hidden; }
 .rankChip:hover { border-color: var(--muted); }
 @media (max-width: 520px) { nav a { padding: .55rem .75rem; font-size: .8rem; } }
 
+/* ---------- friends, challenges, groups, family ---------- */
+.frGrid { display: grid; gap: 1rem; }
+.frGrid > .span2 { grid-column: 1 / -1; }
+.idCard { display: grid; gap: .4rem; align-content: start; }
+.bigCode { font: 600 2.4rem/1.1 var(--mono); letter-spacing: .18em; }
+.inline { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .3rem; }
+.inline input { flex: 1 1 10rem; min-width: 0; }
+.cardHead { display: flex; justify-content: space-between; align-items: center; gap: .6rem; margin-bottom: .6rem; }
+.cardHead h3 { margin: 0; }
+.reqRow { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .55rem 0; border-top: 1px solid var(--line); }
+.reqRow > span:first-child { flex: 1; }
+.reqCard { display: grid; gap: .4rem; padding: .9rem; border: 1px solid var(--line); border-radius: 12px; margin-top: .6rem; }
+.fCard { border-top: 1px solid var(--line); }
+.fCard:first-child { border-top: 0; }
+.fCard > summary { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .7rem; padding: .8rem 0; cursor: pointer; }
+.fCard > summary::-webkit-details-marker { display: none; }
+.fAva { width: 2.3rem; height: 2.3rem; border-radius: 50%; display: grid; place-items: center; background: var(--soft); font-size: 1.2rem; flex: none; }
+.fName { font-weight: 600; flex: 1 1 8rem; }
+.fStats { color: var(--muted); font-size: .85rem; }
+.fBody { padding: 0 0 1rem 3rem; display: grid; gap: .5rem; }
+.fRoutines { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; font-size: .92rem; }
+.fRoutines .done { color: var(--go); }
+.fRoutines .fail { color: var(--stop); text-decoration: line-through; }
+.chCard { border-top: 1px solid var(--line); padding: 1rem 0; display: grid; gap: .5rem; }
+.chCard:first-child { border-top: 0; padding-top: .2rem; }
+.mList { margin: 0; padding-left: 1.2rem; display: grid; gap: .2rem; }
+.mEdit { display: grid; gap: .3rem; margin-bottom: .4rem; }
+.mRow { display: flex; justify-content: space-between; align-items: center; padding: .4rem .6rem; border-radius: 8px; background: var(--soft); }
+.pick { display: flex; align-items: center; gap: .6rem; padding: .35rem 0; cursor: pointer; }
+.pick input { width: 1.15rem; height: 1.15rem; accent-color: var(--go); flex: none; }
+.pick.tall { padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 10px; }
+.pickList { display: grid; gap: .1rem; max-height: 12rem; overflow-y: auto; }
+.lb { display: grid; gap: .25rem; padding: .7rem .9rem; border-radius: 12px; background: var(--soft); }
+.lb .f { margin: 0 0 .2rem; }
+.lbRow { display: flex; justify-content: space-between; font-size: .92rem; }
+.mono { font-family: var(--mono); }
+.answers { display: grid; gap: .45rem; }
+.ansRow p { margin: .1rem 0 0; }
+.a-accepted { color: var(--go); } .a-rejected { color: var(--stop); } .a-changes { color: var(--warm); }
+.muted { color: var(--muted); }
+.answerForm { display: grid; gap: .5rem; }
+.answerForm textarea { min-height: 3.5rem; }
+.backLink { display: inline-block; margin-bottom: .8rem; color: var(--muted); text-decoration: none; font-size: .9rem; }
+.roleBtns button { padding: 1rem .5rem; font-size: .95rem; }
+.roleBtns button:disabled { opacity: .35; cursor: not-allowed; }
+.obGrid { display: grid; gap: .8rem; margin-bottom: .4rem; }
+#chForm { padding: 1.5rem 1.3rem calc(1.4rem + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: 1fr 1fr; gap: 1rem .8rem; }
+#chForm .wide { grid-column: 1 / -1; }
+#chForm h3 { grid-column: 1 / -1; margin: 0; font: 600 1.5rem var(--sans); letter-spacing: -.03em; }
+#chForm .chips { margin-top: .5rem; align-items: center; }
+#chDlg { overflow-y: auto; }
+#onboard .authBox { padding-bottom: 2rem; }
+@media (max-width: 560px) { nav a { padding: .5rem .55rem; font-size: .74rem; } .fBody { padding-left: 0; } }
+
 /* ---------- login + sync ---------- */
 .rec.local { background: var(--muted); }
 .rec.pending { background: var(--warm); }
@@ -438,6 +492,8 @@ body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
   .stats { grid-template-columns: repeat(4, 1fr); }
   .accGrid { grid-template-columns: 1fr 1fr; gap: 1.2rem; align-items: start; }
   .liftGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .frGrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .obGrid { grid-template-columns: 1fr 1fr; }
   #prMain { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
   #prMain .liftGrid { grid-column: 1 / -1; }
   .form4 { grid-template-columns: 2fr 1fr 1fr; }
@@ -595,6 +651,62 @@ body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
     </div>
   </section>
 
+  <!-- ========== FRIENDS ========== -->
+  <section id="friendsPage" class="acc" hidden>
+    <h1 class="prTitle" data-t="frTitle"></h1>
+    <div class="card" id="frNeedAcct" hidden><p data-t="needAccount"></p></div>
+    <div class="frGrid" id="frMain">
+      <div class="card idCard">
+        <span class="f" data-t="myId"></span>
+        <div class="bigCode" id="myCode">······</div>
+        <p class="note" data-t="idHint"></p>
+        <div class="row"><button class="btn ghost small" id="copyCode" data-t="copy"></button></div>
+      </div>
+      <div class="card">
+        <h3 data-t="addFriend"></h3>
+        <div class="inline"><input id="frCode" data-tp="friendIdPh" maxlength="10" autocomplete="off" autocapitalize="characters"><button class="btn" id="frAdd" data-t="sendReq"></button></div>
+        <p class="err" id="frErr"></p>
+        <div id="frRequests"></div>
+      </div>
+      <div class="card span2"><h3 data-t="myFriends"></h3><div id="frList"></div></div>
+      <div class="card span2">
+        <div class="cardHead"><h3 data-t="chTitle"></h3><button class="btn small" id="chNew" data-t="newCh"></button></div>
+        <div id="chList"></div>
+      </div>
+      <div class="card span2">
+        <div class="cardHead"><h3 data-t="grTitle"></h3><button class="btn small" id="grNew" data-t="newGroup"></button></div>
+        <p class="note" id="grHint"></p>
+        <div class="inline" id="grCreateBox" hidden><input id="grName" data-tp="grName" maxlength="40"><button class="btn" id="grCreate" data-t="grCreate"></button></div>
+        <div class="inline"><input id="grJoinCode" data-tp="joinPh" maxlength="10" autocapitalize="characters"><button class="btn ghost" id="grJoin" data-t="join"></button></div>
+        <p class="err" id="grErr"></p>
+        <div id="grList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PARENTAL CONTROL ========== -->
+  <section id="familyPage" class="acc" hidden>
+    <a href="#profile" class="backLink" data-t="back"></a>
+    <h1 class="prTitle" data-t="familyTitle"></h1>
+    <div class="card" id="famNeedAcct" hidden><p data-t="needAccount"></p></div>
+    <div class="frGrid" id="famMain">
+      <div class="card span2">
+        <h3 data-t="whoAreYou"></h3>
+        <div class="days roleBtns" id="famRole"><button type="button" data-v="parent" data-t="iParent"></button><button type="button" data-v="child" data-t="iChild"></button></div>
+        <p class="note" id="famRoleNote"></p>
+      </div>
+      <div class="span2 frGrid" id="famParent" hidden>
+        <div class="card">
+          <h3 data-t="sendToChild"></h3>
+          <div class="inline"><input id="famChildCode" data-tp="childIdPh" maxlength="10" autocapitalize="characters"><button class="btn" id="famSend" data-t="sendReq"></button></div>
+          <p class="err" id="famErr"></p><p class="okMsg" id="famOk"></p>
+        </div>
+        <div class="card"><h3 data-t="myChildren"></h3><div id="famChildren"></div></div>
+      </div>
+      <div class="card span2" id="famChild" hidden><h3 data-t="requestsForYou"></h3><div id="famRequests"></div></div>
+    </div>
+  </section>
+
   <!-- ========== PROFILE / ACCOUNT ========== -->
   <section id="profilePage" class="acc" hidden>
     <div class="accHead">
@@ -684,6 +796,17 @@ body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
         </div>
       </div>
 
+      <!-- Privacy + family -->
+      <div class="card">
+        <h3 data-t="secPrivacy"></h3>
+        <label class="sw"><span data-t="pScore"></span><input type="checkbox" id="pScore"><i></i></label>
+        <label class="sw"><span data-t="pRoutines"></span><input type="checkbox" id="pRoutines"><i></i></label>
+        <p class="note" data-t="privacyNote"></p>
+        <h3 class="mt" data-t="secFamily"></h3>
+        <p class="note" id="famSummary"></p>
+        <a class="btn ghost" href="#family" data-t="familyOpen"></a>
+      </div>
+
       <!-- Data -->
       <div class="card span2">
         <h3 data-t="secData"></h3>
@@ -705,6 +828,7 @@ body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
 <nav>
   <a href="#today" id="navToday" data-t="navToday"></a>
   <a href="#pr" id="navPr" data-t="navPr"></a>
+  <a href="#friends" id="navFriends" data-t="navFriends"></a>
   <a href="#stats" id="navStats" data-t="navStats"></a>
   <a href="#profile" id="navProfile" data-t="navProfile"></a>
 </nav>
@@ -740,6 +864,7 @@ body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
       <h2 id="authTitle"></h2>
       <p class="note" data-t="authSub"></p>
       <p class="warnNote" id="fileNote" data-t="e_file" hidden></p>
+      <p class="warnNote" id="inAppNote" data-t="e_inapp" hidden></p>
       <button class="btn ghost wide" id="gBtn" data-t="google"></button>
       <div class="orLine"><span data-t="or"></span></div>
       <form id="authForm" novalidate>
@@ -756,6 +881,42 @@ body.authing main, body.authing nav, body.authing .hud { visibility: hidden; }
     </div>
   </div>
 </div>
+
+<!-- Required details after sign-in -->
+<div class="authScreen" id="onboard" hidden>
+  <form class="authBox" id="obForm" novalidate>
+    <div class="authBrand"><span class="rec"></span> Routine</div>
+    <h2 data-t="obTitle"></h2>
+    <p class="note" data-t="obSub"></p>
+    <div class="obGrid">
+      <div><label class="f" for="obFirst" data-t="fFirst"></label><input id="obFirst" autocomplete="given-name"></div>
+      <div><label class="f" for="obLast" data-t="fLast"></label><input id="obLast" autocomplete="family-name"></div>
+      <div><label class="f" for="obPhone" data-t="fPhone"></label><input id="obPhone" type="tel" inputmode="tel" placeholder="+998 90 123 45 67" autocomplete="tel"></div>
+      <div><label class="f" for="obBirth" data-t="fBirth"></label><input id="obBirth" type="date"></div>
+    </div>
+    <p class="err" id="obErr"></p>
+    <button class="btn wide" type="submit" data-t="obSave"></button>
+  </form>
+</div>
+
+<!-- New challenge sheet -->
+<dialog id="chDlg">
+  <form id="chForm" novalidate>
+    <h3 data-t="newCh2"></h3>
+    <div class="wide"><label class="f" for="chName" data-t="chName"></label><input id="chName" data-tp="chNamePh" maxlength="60"></div>
+    <div><label class="f" for="chDays" data-t="chDays"></label><input id="chDays" type="number" min="1" max="60" value="7"></div>
+    <div><label class="f" for="chStart" data-t="chStart"></label><input id="chStart" type="date"></div>
+    <div class="wide"><span class="f" data-t="chMissions"></span>
+      <div id="chMissionList" class="mEdit"></div>
+      <div class="inline"><input id="chMissionIn" data-tp="missionPh" maxlength="60"><button type="button" class="btn ghost" id="chMissionAdd" data-t="addMission"></button></div>
+      <div class="chips" id="chFromMine"></div>
+    </div>
+    <div class="wide"><span class="f" data-t="chWho"></span><div id="chFriends" class="pickList"></div></div>
+    <div class="wide"><label class="f" for="chGroupSel" data-t="chGroup"></label><select id="chGroupSel"></select></div>
+    <p class="err wide" id="chErr"></p>
+    <div class="dlgBtns"><button type="button" class="btn ghost" id="chCancel" data-t="cancel"></button><button type="submit" class="btn" data-t="chCreate"></button></div>
+  </form>
+</dialog>
 
 <!-- Lock screen -->
 <div class="lock" id="lock" hidden>
@@ -824,7 +985,7 @@ const WORDS = {
     e_email: "Email noto'g'ri.", e_cred: "Email yoki parol noto'g'ri.", e_inuse: "Bu email bilan akkaunt allaqachon bor. \"Kirish\" ni tanlang.",
     e_weak: "Parol kamida 6 belgi bo'lsin.", e_file: "Kirish faqat saytda ishlaydi (faylni kompyuterdan ochganda emas).",
     e_domain: "Bu sayt manzili Firebase'da ruxsat etilmagan (Authorized domains).", e_net: "Internet aloqasi yo'q.",
-    e_many: "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring.", e_provider: "Bu kirish usuli Firebase'da yoqilmagan.", navPr: "Rekordlar", prTitle: "Shaxsiy rekordlar", bodyTitle: "Avval o'zingiz haqingizda", bodyWhy: "Reyting ko'targan vazningizni tana vazningizga solishtirib hisoblanadi. Kuch standartlari jinsga qarab farq qiladi.", bWeight: "Tana vazni (kg)", bHeight: "Bo'y (sm)", bSex: "Jins", male: "Erkak", female: "Ayol", bodyBad: "Vazn 25–300 kg, bo'y 100–250 sm oralig'ida bo'lsin.", bodyEdit: "Vazn / bo'yni o'zgartirish", strengthRank: "Kuch reytingi", rankNone: "Hali rekord yo'q", rankNoneSub: "Birinchi mashqingizni qo'shing", score: "{0}/100 ball", nextOverall: "Keyingi daraja: {0}", bmi: "TVI {0} · {1}", bmiU: "vazn kam", bmiN: "me'yorda", bmiO: "ortiqcha vazn", bmiOb: "semizlik", addSet: "Natija qo'shish", exercise: "Mashq", weightKg: "Vazn (kg)", extraKg: "Qo'shimcha vazn (kg)", reps: "Takror", newEx: "+ Boshqa mashq", newExName: "Mashq nomi", newExPh: "Masalan: Biceps curl", setBad: "Vazn va takror sonini to'g'ri kiriting.", needExName: "Mashq nomini yozing.", formulaNote: "Bir martalik maksimum (1RM) Epley formulasi bilan taxminan hisoblanadi: vazn × (1 + takror ÷ 30). 10 dan ko'p takrorda aniqlik pasayadi. Reytinglar umumiy kuch standartlariga asoslangan taxminiy ko'rsatkich.", best: "Eng yaxshi: {0}", e1rm: "≈ {0} kg 1RM", ratio: "{0}× tana vazni", toNext: "{0} gacha: yana {1}", maxRank: "Eng yuqori daraja!", unranked: "Reytingsiz mashq", noSets: "Hali natija yo'q", repsUnit: "marta", newPR: "Yangi rekord!", prCoins: "🏆 Rekord: ", delSet: "Bu natija o'chirilsinmi?", bodyFirst: "Reyting uchun avval vazn va bo'yingizni kiriting.", ex_bench: "Bench press (yotib siqish)", ex_squat: "Squat (o'tirib-turish)", ex_deadlift: "Deadlift (o'lik tortish)", ex_ohp: "Overhead press (tik turib siqish)", ex_row: "Barbell row (egilib tortish)", ex_pullup: "Turnik (tortilish)", rk0: "Yangi", rk1: "Bronza", rk2: "Kumush", rk3: "Oltin", rk4: "Platina", rk5: "Olmos", navStats: "Statistika", memberSince: "{0} dan beri", secPersonal: "Shaxsiy ma'lumotlar", fFirst: "Ism", fLast: "Familiya",
+    e_many: "Juda ko'p urinish. Birozdan keyin qayta urinib ko'ring.", e_provider: "Bu kirish usuli Firebase'da yoqilmagan.", navPr: "Rekordlar", prTitle: "Shaxsiy rekordlar", bodyTitle: "Avval o'zingiz haqingizda", bodyWhy: "Reyting ko'targan vazningizni tana vazningizga solishtirib hisoblanadi. Kuch standartlari jinsga qarab farq qiladi.", bWeight: "Tana vazni (kg)", bHeight: "Bo'y (sm)", bSex: "Jins", male: "Erkak", female: "Ayol", bodyBad: "Vazn 25–300 kg, bo'y 100–250 sm oralig'ida bo'lsin.", bodyEdit: "Vazn / bo'yni o'zgartirish", strengthRank: "Kuch reytingi", rankNone: "Hali rekord yo'q", rankNoneSub: "Birinchi mashqingizni qo'shing", score: "{0}/100 ball", nextOverall: "Keyingi daraja: {0}", bmi: "TVI {0} · {1}", bmiU: "vazn kam", bmiN: "me'yorda", bmiO: "ortiqcha vazn", bmiOb: "semizlik", addSet: "Natija qo'shish", exercise: "Mashq", weightKg: "Vazn (kg)", extraKg: "Qo'shimcha vazn (kg)", reps: "Takror", newEx: "+ Boshqa mashq", newExName: "Mashq nomi", newExPh: "Masalan: Biceps curl", setBad: "Vazn va takror sonini to'g'ri kiriting.", needExName: "Mashq nomini yozing.", formulaNote: "Bir martalik maksimum (1RM) Epley formulasi bilan taxminan hisoblanadi: vazn × (1 + takror ÷ 30). 10 dan ko'p takrorda aniqlik pasayadi. Reytinglar umumiy kuch standartlariga asoslangan taxminiy ko'rsatkich.", best: "Eng yaxshi: {0}", e1rm: "≈ {0} kg 1RM", ratio: "{0}× tana vazni", toNext: "{0} gacha: yana {1}", maxRank: "Eng yuqori daraja!", unranked: "Reytingsiz mashq", noSets: "Hali natija yo'q", repsUnit: "marta", newPR: "Yangi rekord!", prCoins: "🏆 Rekord: ", delSet: "Bu natija o'chirilsinmi?", bodyFirst: "Reyting uchun avval vazn va bo'yingizni kiriting.", ex_bench: "Bench press (yotib siqish)", ex_squat: "Squat (o'tirib-turish)", ex_deadlift: "Deadlift (o'lik tortish)", ex_ohp: "Overhead press (tik turib siqish)", ex_row: "Barbell row (egilib tortish)", ex_pullup: "Turnik (tortilish)", rk0: "Yangi", rk1: "Bronza", rk2: "Kumush", rk3: "Oltin", rk4: "Platina", rk5: "Olmos", e_inapp: "Sayt ilova ichidagi brauzerda ochilgan (masalan Telegram yoki Instagram). Google bu yerda kirishga ruxsat bermaydi. ⋮ menyusidan «Brauzerda ochish» ni bosing yoki email va parol bilan kiring.", e_storage: "Brauzer kirish ma'lumotini saqlay olmadi. Saytni oddiy (inkognito emas) Chrome yoki Safari oynasida oching yoki email bilan kiring.", e_popup: "Kirish oynasi ochilmadi. Qayta bosing; bo'lmasa email va parol bilan kiring.", navFriends: "Do'stlar", obTitle: "Profilingizni to'ldiring", obSub: "Davom etish uchun bu ma'lumotlar majburiy. Telefon raqamingiz boshqalarga ko'rsatilmaydi.", obSave: "Davom etish", obNeed: "Barcha maydonlarni to'ldiring.", birthBad: "Tug'ilgan sanani to'g'ri kiriting.", frTitle: "Do'stlar", myId: "Mening ID raqamim", copy: "Nusxa olish", copied: "Nusxalandi ✓", idHint: "Shu ID ni do'stingizga bering, u sizni shu orqali qo'shadi.", addFriend: "Do'st qo'shish", friendIdPh: "Do'stingizning ID si", sendReq: "So'rov yuborish", reqSent: "So'rov yuborildi", idNotFound: "Bunday ID topilmadi.", selfId: "Bu sizning o'z ID ingiz.", alreadyFr: "Siz allaqachon do'stsiz yoki so'rov yuborilgan.", alreadyFr2: "So'rov allaqachon yuborilgan.", incoming: "Kelgan so'rovlar", outgoing: "Yuborilgan so'rovlar", accept: "Qabul qilish", reject: "Rad etish", cancelReq: "Bekor qilish", myFriends: "Do'stlarim", noFriends: "Hali do'st yo'q. ID orqali qo'shing.", hidden: "natijalarini yashirgan", todayX: "bugun {0}/{1}", unfriend: "Do'stlikdan chiqarish", unfriendConfirm: "{0} do'stlar ro'yxatidan o'chirilsinmi?", theirRoutines: "Bugungi odatlari", routinesHidden: "Odatlarini yashirgan.", notToday2: "Bugun hali kirmagan.", needAccount: "Bu bo'lim faqat akkaunt bilan ishlaydi.", chTitle: "Musobaqalar", newCh: "+ Musobaqa", newCh2: "Yangi musobaqa", noCh: "Hali musobaqa yo'q.", chName: "Musobaqa nomi", chNamePh: "Masalan: 7 kunlik erta turish", chDays: "Necha kun", chStart: "Boshlanish sanasi", chMissions: "Har kungi vazifalar", missionPh: "Masalan: 20 daqiqa kitob o'qish", addMission: "+ Qo'shish", fromMine: "Odatlarimdan:", chWho: "Kim bilan", chGroup: "Yoki butun guruh bilan", noneGroup: "guruhsiz", chCreate: "Taklif yuborish", chNeedName: "Nom va kamida bitta vazifa kiriting.", chNeedWho: "Kamida bitta do'st yoki guruh tanlang.", chSent: "Taklif yuborildi", stProposed: "Taklif", stActive: "Faol", stDoneCh: "Tugagan", daysWord: "kun", waiting: "javob kutilmoqda", acceptCh: "Qabul qilaman", rejectCh: "Rad etaman", suggestCh: "O'zgartirish so'rayman", suggestMissions: "Qo'shishni taklif qilaman (vergul bilan)", answerSent: "Javob yuborildi", ansAccepted: "qabul qildi", ansRejected: "rad etdi", ansChanges: "o'zgartirish so'radi", applySugg: "Takliflarni qo'shib, qayta yuborish", repropose: "Qayta taklif qilish", deleteCh: "O'chirish", delChConfirm: "Musobaqa o'chirilsinmi?", daysLeft: "{0} kun qoldi", startsIn: "{0} kundan keyin boshlanadi", todayMissions: "Bugungi vazifalar", leaderboard: "Natijalar", winner: "G'olib: {0}", you: "Siz", grTitle: "Guruhlar", newGroup: "+ Guruh ochish", grNeedCoins: "Guruh ochish uchun kamida 50 tanga kerak (sizda {0}).", grName: "Guruh nomi", grCreate: "Yaratish", joinCode: "Kod", joinPh: "Guruh kodi bilan qo'shilish", join: "Qo'shilish", joined: "Guruhga qo'shildingiz", grNotFound: "Bunday guruh topilmadi.", members: "{0} a'zo", leave: "Guruhdan chiqish", leaveConfirm: "Guruhdan chiqasizmi?", delGroup: "Guruhni o'chirish", grCodeHint: "Do'stlaringiz shu kod bilan qo'shiladi.", noGroups: "Hali guruh yo'q.", grCreated: "Guruh yaratildi. Kod: {0}", secPrivacy: "Maxfiylik", pScore: "Do'stlarim tangam va darajamni ko'rsin", pRoutines: "Do'stlarim bugungi odatlarimni ko'rsin", privacyNote: "Ulangan ota-onangiz baribir ko'radi. Telefon raqamingiz hech kimga ko'rsatilmaydi.", secFamily: "Ota-ona nazorati", familyOpen: "Ota-ona nazoratini ochish", familyTitle: "Ota-ona nazorati", back: "← Profil", whoAreYou: "Siz kimsiz?", iParent: "Men ota-onaman", iChild: "Men farzandman", roleLocked: "Ulangan aloqa bor ekan, rolni o'zgartirib bo'lmaydi.", sendToChild: "Farzandingizga so'rov yuborish", childIdPh: "Farzandingizning ID si", parReqSent: "So'rov yuborildi. Farzandingiz o'z akkauntida «Men farzandman» bo'limiga kirib, uni qabul qilishi kerak.", myChildren: "Farzandlarim", noChildren: "Hali farzand ulanmagan.", pendingAcc: "qabul qilinishi kutilmoqda", unlink: "Aloqani uzish", unlinkConfirm: "{0} bilan aloqa uzilsinmi?", sendTask: "Vazifa yuborish", taskNamePh: "Vazifa nomi", taskSent: "Vazifa yuborildi", requestsForYou: "Sizga kelgan so'rovlar", noRequests: "Hozircha so'rov yo'q.", parentWants: "{0} sizni ota-ona sifatida kuzatmoqchi", linkedParent: "Sizni kuzatadi: {0}", onlyParent: "Aloqani faqat ota-onangiz uzishi mumkin.", gotTask: "{0} vazifa yubordi: {1}", famSumParent: "Ulangan farzandlar: {0}", famSumChild: "Kuzatuvchi: {0}", famSumReq: "Sizga {0} ta so'rov keldi", famSumNone: "Ulanmagan", e_rules: "Firebase'dagi Rules hali yangilanmagan. Yangi qoidalarni Firestore'ga qo'ying.", idWord: "ID", navStats: "Statistika", memberSince: "{0} dan beri", secPersonal: "Shaxsiy ma'lumotlar", fFirst: "Ism", fLast: "Familiya",
     fPhone: "Telefon raqam", fBirth: "Tug'ilgan kun", fGoal: "Asosiy maqsadim", goalPh: "Masalan: har kuni 7:00 da turish",
     phoneBad: "Raqam noto'g'ri. Masalan: +998 90 123 45 67", emailBad: "Email noto'g'ri", saved: "Saqlandi ✓",
     photo: "Rasm yuklash", photoDel: "Rasmni olib tashlash", secSecurity: "Xavfsizlik", passOff: "Parol o'rnatilmagan", passOn: "Parol o'rnatilgan 🔒",
@@ -891,7 +1052,7 @@ const WORDS = {
     e_email: "Invalid email.", e_cred: "Wrong email or password.", e_inuse: "An account with this email already exists. Choose Sign in.",
     e_weak: "Use at least 6 characters.", e_file: "Sign-in only works on the website (not when the file is opened from your computer).",
     e_domain: "This site address isn't allowed in Firebase (Authorized domains).", e_net: "No internet connection.",
-    e_many: "Too many attempts. Try again a bit later.", e_provider: "This sign-in method isn't enabled in Firebase.", navPr: "Records", prTitle: "Personal records", bodyTitle: "First, about you", bodyWhy: "Your rank compares what you lift with your body weight. Strength standards differ for men and women.", bWeight: "Body weight (kg)", bHeight: "Height (cm)", bSex: "Sex", male: "Male", female: "Female", bodyBad: "Weight must be 25–300 kg and height 100–250 cm.", bodyEdit: "Edit weight / height", strengthRank: "Strength rank", rankNone: "No records yet", rankNoneSub: "Add your first lift", score: "{0}/100 points", nextOverall: "Next rank: {0}", bmi: "BMI {0} · {1}", bmiU: "underweight", bmiN: "normal", bmiO: "overweight", bmiOb: "obese", addSet: "Add a result", exercise: "Exercise", weightKg: "Weight (kg)", extraKg: "Added weight (kg)", reps: "Reps", newEx: "+ Other exercise", newExName: "Exercise name", newExPh: "e.g. Biceps curl", setBad: "Enter a valid weight and number of reps.", needExName: "Type the exercise name.", formulaNote: "One-rep max (1RM) is estimated with the Epley formula: weight × (1 + reps ÷ 30). Accuracy drops above 10 reps. Ranks are a rough guide based on common strength standards.", best: "Best: {0}", e1rm: "≈ {0} kg 1RM", ratio: "{0}× body weight", toNext: "To {0}: {1} more", maxRank: "Top rank!", unranked: "Unranked exercise", noSets: "No results yet", repsUnit: "reps", newPR: "New record!", prCoins: "🏆 Record: ", delSet: "Delete this result?", bodyFirst: "Enter your weight and height first to get a rank.", ex_bench: "Bench press", ex_squat: "Squat", ex_deadlift: "Deadlift", ex_ohp: "Overhead press", ex_row: "Barbell row", ex_pullup: "Pull-ups", rk0: "Rookie", rk1: "Bronze", rk2: "Silver", rk3: "Gold", rk4: "Platinum", rk5: "Diamond", navStats: "Stats", memberSince: "Since {0}", secPersonal: "Personal info", fFirst: "First name", fLast: "Last name",
+    e_many: "Too many attempts. Try again a bit later.", e_provider: "This sign-in method isn't enabled in Firebase.", navPr: "Records", prTitle: "Personal records", bodyTitle: "First, about you", bodyWhy: "Your rank compares what you lift with your body weight. Strength standards differ for men and women.", bWeight: "Body weight (kg)", bHeight: "Height (cm)", bSex: "Sex", male: "Male", female: "Female", bodyBad: "Weight must be 25–300 kg and height 100–250 cm.", bodyEdit: "Edit weight / height", strengthRank: "Strength rank", rankNone: "No records yet", rankNoneSub: "Add your first lift", score: "{0}/100 points", nextOverall: "Next rank: {0}", bmi: "BMI {0} · {1}", bmiU: "underweight", bmiN: "normal", bmiO: "overweight", bmiOb: "obese", addSet: "Add a result", exercise: "Exercise", weightKg: "Weight (kg)", extraKg: "Added weight (kg)", reps: "Reps", newEx: "+ Other exercise", newExName: "Exercise name", newExPh: "e.g. Biceps curl", setBad: "Enter a valid weight and number of reps.", needExName: "Type the exercise name.", formulaNote: "One-rep max (1RM) is estimated with the Epley formula: weight × (1 + reps ÷ 30). Accuracy drops above 10 reps. Ranks are a rough guide based on common strength standards.", best: "Best: {0}", e1rm: "≈ {0} kg 1RM", ratio: "{0}× body weight", toNext: "To {0}: {1} more", maxRank: "Top rank!", unranked: "Unranked exercise", noSets: "No results yet", repsUnit: "reps", newPR: "New record!", prCoins: "🏆 Record: ", delSet: "Delete this result?", bodyFirst: "Enter your weight and height first to get a rank.", ex_bench: "Bench press", ex_squat: "Squat", ex_deadlift: "Deadlift", ex_ohp: "Overhead press", ex_row: "Barbell row", ex_pullup: "Pull-ups", rk0: "Rookie", rk1: "Bronze", rk2: "Silver", rk3: "Gold", rk4: "Platinum", rk5: "Diamond", e_inapp: "This site is open in an app's built-in browser (e.g. Telegram or Instagram). Google doesn't allow sign-in here. Tap ⋮ → \"Open in browser\", or sign in with email and password.", e_storage: "The browser couldn't store your sign-in. Open the site in a normal (not incognito) Chrome or Safari window, or sign in with email.", e_popup: "The sign-in window didn't open. Tap again, or sign in with email and password.", navFriends: "Friends", obTitle: "Complete your profile", obSub: "These details are required to continue. Your phone number is never shown to anyone.", obSave: "Continue", obNeed: "Fill in all fields.", birthBad: "Enter a valid date of birth.", frTitle: "Friends", myId: "My ID", copy: "Copy", copied: "Copied ✓", idHint: "Give this ID to a friend so they can add you.", addFriend: "Add a friend", friendIdPh: "Friend's ID", sendReq: "Send request", reqSent: "Request sent", idNotFound: "No account with this ID.", selfId: "That's your own ID.", alreadyFr: "You're already friends or a request is pending.", alreadyFr2: "A request was already sent.", incoming: "Incoming requests", outgoing: "Sent requests", accept: "Accept", reject: "Decline", cancelReq: "Cancel", myFriends: "My friends", noFriends: "No friends yet. Add one by ID.", hidden: "keeps results private", todayX: "today {0}/{1}", unfriend: "Remove friend", unfriendConfirm: "Remove {0} from friends?", theirRoutines: "Today's routines", routinesHidden: "Routines are private.", notToday2: "Hasn't opened the app today.", needAccount: "This section needs an account.", chTitle: "Challenges", newCh: "+ Challenge", newCh2: "New challenge", noCh: "No challenges yet.", chName: "Challenge name", chNamePh: "e.g. 7 days of early mornings", chDays: "How many days", chStart: "Start date", chMissions: "Daily missions", missionPh: "e.g. read for 20 minutes", addMission: "+ Add", fromMine: "From my routines:", chWho: "With whom", chGroup: "Or with a whole group", noneGroup: "no group", chCreate: "Send proposal", chNeedName: "Enter a name and at least one mission.", chNeedWho: "Pick at least one friend or a group.", chSent: "Proposal sent", stProposed: "Proposed", stActive: "Active", stDoneCh: "Finished", daysWord: "days", waiting: "waiting for an answer", acceptCh: "I accept", rejectCh: "I decline", suggestCh: "Ask for changes", suggestMissions: "I suggest adding (comma separated)", answerSent: "Answer sent", ansAccepted: "accepted", ansRejected: "declined", ansChanges: "asked for changes", applySugg: "Add suggestions and send again", repropose: "Send again", deleteCh: "Delete", delChConfirm: "Delete this challenge?", daysLeft: "{0} days left", startsIn: "Starts in {0} days", todayMissions: "Today's missions", leaderboard: "Results", winner: "Winner: {0}", you: "You", grTitle: "Groups", newGroup: "+ Create group", grNeedCoins: "You need at least 50 coins to create a group (you have {0}).", grName: "Group name", grCreate: "Create", joinCode: "Code", joinPh: "Join with a group code", join: "Join", joined: "You joined the group", grNotFound: "No group with this code.", members: "{0} members", leave: "Leave group", leaveConfirm: "Leave this group?", delGroup: "Delete group", grCodeHint: "Friends join with this code.", noGroups: "No groups yet.", grCreated: "Group created. Code: {0}", secPrivacy: "Privacy", pScore: "Friends can see my coins and level", pRoutines: "Friends can see my routines for today", privacyNote: "A linked parent still sees everything. Your phone number is never shown to anyone.", secFamily: "Parental control", familyOpen: "Open parental control", familyTitle: "Parental control", back: "← Profile", whoAreYou: "Who are you?", iParent: "I'm a parent", iChild: "I'm a child", roleLocked: "While a link exists, the role can't be changed.", sendToChild: "Send a request to your child", childIdPh: "Your child's ID", parReqSent: "Request sent. Your child must open “I'm a child” in their account and accept it.", myChildren: "My children", noChildren: "No children linked yet.", pendingAcc: "waiting for approval", unlink: "Unlink", unlinkConfirm: "Unlink {0}?", sendTask: "Send a task", taskNamePh: "Task name", taskSent: "Task sent", requestsForYou: "Requests for you", noRequests: "No requests right now.", parentWants: "{0} wants to follow you as a parent", linkedParent: "Followed by: {0}", onlyParent: "Only your parent can remove this link.", gotTask: "{0} sent a task: {1}", famSumParent: "Linked children: {0}", famSumChild: "Followed by: {0}", famSumReq: "You have {0} request(s)", famSumNone: "Not linked", e_rules: "The Firebase Rules haven't been updated yet. Paste the new rules into Firestore.", idWord: "ID", navStats: "Stats", memberSince: "Since {0}", secPersonal: "Personal info", fFirst: "First name", fLast: "Last name",
     fPhone: "Phone number", fBirth: "Birthday", fGoal: "My main goal", goalPh: "e.g. wake up at 7:00 every day",
     phoneBad: "Invalid number. Example: +998 90 123 45 67", emailBad: "Invalid email", saved: "Saved ✓",
     photo: "Upload photo", photoDel: "Remove photo", secSecurity: "Security", passOff: "No password set", passOn: "Password is set 🔒",
@@ -1008,7 +1169,7 @@ const WORDS = {
       "e_net": "Нет подключения к интернету.",
       "e_many": "Слишком много попыток. Попробуйте чуть позже.",
       "e_provider": "Этот способ входа не включён в Firebase.",
-      navPr: "Рекорды", prTitle: "Личные рекорды", bodyTitle: "Сначала о вас", bodyWhy: "Рейтинг считается по отношению поднятого веса к весу тела. Нормативы силы отличаются для мужчин и женщин.", bWeight: "Вес тела (кг)", bHeight: "Рост (см)", bSex: "Пол", male: "Мужской", female: "Женский", bodyBad: "Вес должен быть 25–300 кг, рост 100–250 см.", bodyEdit: "Изменить вес / рост", strengthRank: "Рейтинг силы", rankNone: "Рекордов пока нет", rankNoneSub: "Добавьте первое упражнение", score: "{0}/100 баллов", nextOverall: "Следующий ранг: {0}", bmi: "ИМТ {0} · {1}", bmiU: "недостаток веса", bmiN: "норма", bmiO: "избыточный вес", bmiOb: "ожирение", addSet: "Добавить результат", exercise: "Упражнение", weightKg: "Вес (кг)", extraKg: "Доп. вес (кг)", reps: "Повторы", newEx: "+ Другое упражнение", newExName: "Название упражнения", newExPh: "Например: подъём на бицепс", setBad: "Введите корректный вес и число повторов.", needExName: "Введите название упражнения.", formulaNote: "Разовый максимум (1RM) рассчитывается приблизительно по формуле Эпли: вес × (1 + повторы ÷ 30). При более чем 10 повторах точность падает. Ранги — приблизительная оценка по общим нормативам силы.", best: "Лучший: {0}", e1rm: "≈ {0} кг 1RM", ratio: "{0}× веса тела", toNext: "До ранга «{0}»: ещё {1}", maxRank: "Высший ранг!", unranked: "Без рейтинга", noSets: "Результатов пока нет", repsUnit: "раз", newPR: "Новый рекорд!", prCoins: "🏆 Рекорд: ", delSet: "Удалить этот результат?", bodyFirst: "Для рейтинга сначала укажите вес и рост.", ex_bench: "Жим лёжа", ex_squat: "Приседания", ex_deadlift: "Становая тяга", ex_ohp: "Жим стоя", ex_row: "Тяга штанги в наклоне", ex_pullup: "Подтягивания", rk0: "Новичок", rk1: "Бронза", rk2: "Серебро", rk3: "Золото", rk4: "Платина", rk5: "Алмаз", "navStats": "Статистика",
+      navPr: "Рекорды", prTitle: "Личные рекорды", bodyTitle: "Сначала о вас", bodyWhy: "Рейтинг считается по отношению поднятого веса к весу тела. Нормативы силы отличаются для мужчин и женщин.", bWeight: "Вес тела (кг)", bHeight: "Рост (см)", bSex: "Пол", male: "Мужской", female: "Женский", bodyBad: "Вес должен быть 25–300 кг, рост 100–250 см.", bodyEdit: "Изменить вес / рост", strengthRank: "Рейтинг силы", rankNone: "Рекордов пока нет", rankNoneSub: "Добавьте первое упражнение", score: "{0}/100 баллов", nextOverall: "Следующий ранг: {0}", bmi: "ИМТ {0} · {1}", bmiU: "недостаток веса", bmiN: "норма", bmiO: "избыточный вес", bmiOb: "ожирение", addSet: "Добавить результат", exercise: "Упражнение", weightKg: "Вес (кг)", extraKg: "Доп. вес (кг)", reps: "Повторы", newEx: "+ Другое упражнение", newExName: "Название упражнения", newExPh: "Например: подъём на бицепс", setBad: "Введите корректный вес и число повторов.", needExName: "Введите название упражнения.", formulaNote: "Разовый максимум (1RM) рассчитывается приблизительно по формуле Эпли: вес × (1 + повторы ÷ 30). При более чем 10 повторах точность падает. Ранги — приблизительная оценка по общим нормативам силы.", best: "Лучший: {0}", e1rm: "≈ {0} кг 1RM", ratio: "{0}× веса тела", toNext: "До ранга «{0}»: ещё {1}", maxRank: "Высший ранг!", unranked: "Без рейтинга", noSets: "Результатов пока нет", repsUnit: "раз", newPR: "Новый рекорд!", prCoins: "🏆 Рекорд: ", delSet: "Удалить этот результат?", bodyFirst: "Для рейтинга сначала укажите вес и рост.", ex_bench: "Жим лёжа", ex_squat: "Приседания", ex_deadlift: "Становая тяга", ex_ohp: "Жим стоя", ex_row: "Тяга штанги в наклоне", ex_pullup: "Подтягивания", rk0: "Новичок", rk1: "Бронза", rk2: "Серебро", rk3: "Золото", rk4: "Платина", rk5: "Алмаз", "e_inapp": "Сайт открыт во встроенном браузере приложения (например, Telegram или Instagram). Google не разрешает здесь вход. Нажмите ⋮ → «Открыть в браузере» или войдите по email и паролю.", "e_storage": "Браузер не смог сохранить данные входа. Откройте сайт в обычном (не инкогнито) окне Chrome или Safari или войдите по email.", "e_popup": "Окно входа не открылось. Нажмите ещё раз или войдите по email и паролю.", "navFriends": "Друзья", "obTitle": "Заполните профиль", "obSub": "Эти данные обязательны, чтобы продолжить. Номер телефона никому не показывается.", "obSave": "Продолжить", "obNeed": "Заполните все поля.", "birthBad": "Введите корректную дату рождения.", "frTitle": "Друзья", "myId": "Мой ID", "copy": "Копировать", "copied": "Скопировано ✓", "idHint": "Дайте этот ID другу — по нему он вас добавит.", "addFriend": "Добавить друга", "friendIdPh": "ID друга", "sendReq": "Отправить запрос", "reqSent": "Запрос отправлен", "idNotFound": "Такой ID не найден.", "selfId": "Это ваш собственный ID.", "alreadyFr": "Вы уже друзья или запрос уже отправлен.", "alreadyFr2": "Запрос уже отправлен.", "incoming": "Входящие запросы", "outgoing": "Отправленные запросы", "accept": "Принять", "reject": "Отклонить", "cancelReq": "Отменить", "myFriends": "Мои друзья", "noFriends": "Друзей пока нет. Добавьте по ID.", "hidden": "скрыл(а) результаты", "todayX": "сегодня {0}/{1}", "unfriend": "Удалить из друзей", "unfriendConfirm": "Удалить {0} из друзей?", "theirRoutines": "Привычки на сегодня", "routinesHidden": "Привычки скрыты.", "notToday2": "Сегодня ещё не заходил(а).", "needAccount": "Этот раздел работает только с аккаунтом.", "chTitle": "Челленджи", "newCh": "+ Челлендж", "newCh2": "Новый челлендж", "noCh": "Челленджей пока нет.", "chName": "Название", "chNamePh": "Например: 7 дней ранних подъёмов", "chDays": "Сколько дней", "chStart": "Дата начала", "chMissions": "Ежедневные задания", "missionPh": "Например: 20 минут чтения", "addMission": "+ Добавить", "fromMine": "Из моих привычек:", "chWho": "С кем", "chGroup": "Или со всей группой", "noneGroup": "без группы", "chCreate": "Отправить предложение", "chNeedName": "Введите название и хотя бы одно задание.", "chNeedWho": "Выберите хотя бы одного друга или группу.", "chSent": "Предложение отправлено", "stProposed": "Предложение", "stActive": "Активен", "stDoneCh": "Завершён", "daysWord": "дн.", "waiting": "ждём ответа", "acceptCh": "Принимаю", "rejectCh": "Отклоняю", "suggestCh": "Прошу изменить", "suggestMissions": "Предлагаю добавить (через запятую)", "answerSent": "Ответ отправлен", "ansAccepted": "принял(а)", "ansRejected": "отклонил(а)", "ansChanges": "просит изменить", "applySugg": "Добавить предложения и отправить снова", "repropose": "Отправить снова", "deleteCh": "Удалить", "delChConfirm": "Удалить челлендж?", "daysLeft": "Осталось дней: {0}", "startsIn": "Начнётся через {0} дн.", "todayMissions": "Задания на сегодня", "leaderboard": "Результаты", "winner": "Победитель: {0}", "you": "Вы", "grTitle": "Группы", "newGroup": "+ Создать группу", "grNeedCoins": "Чтобы создать группу, нужно минимум 50 монет (у вас {0}).", "grName": "Название группы", "grCreate": "Создать", "joinCode": "Код", "joinPh": "Вступить по коду группы", "join": "Вступить", "joined": "Вы вступили в группу", "grNotFound": "Такая группа не найдена.", "members": "Участников: {0}", "leave": "Выйти из группы", "leaveConfirm": "Выйти из группы?", "delGroup": "Удалить группу", "grCodeHint": "Друзья вступают по этому коду.", "noGroups": "Групп пока нет.", "grCreated": "Группа создана. Код: {0}", "secPrivacy": "Приватность", "pScore": "Друзья видят мои монеты и уровень", "pRoutines": "Друзья видят мои привычки на сегодня", "privacyNote": "Привязанный родитель видит всё. Номер телефона никому не показывается.", "secFamily": "Родительский контроль", "familyOpen": "Открыть родительский контроль", "familyTitle": "Родительский контроль", "back": "← Профиль", "whoAreYou": "Кто вы?", "iParent": "Я родитель", "iChild": "Я ребёнок", "roleLocked": "Пока есть связь, роль изменить нельзя.", "sendToChild": "Отправить запрос ребёнку", "childIdPh": "ID ребёнка", "parReqSent": "Запрос отправлен. Ребёнок должен открыть в своём аккаунте раздел «Я ребёнок» и принять его.", "myChildren": "Мои дети", "noChildren": "Дети пока не привязаны.", "pendingAcc": "ожидает подтверждения", "unlink": "Отвязать", "unlinkConfirm": "Отвязать {0}?", "sendTask": "Отправить задачу", "taskNamePh": "Название задачи", "taskSent": "Задача отправлена", "requestsForYou": "Запросы для вас", "noRequests": "Запросов пока нет.", "parentWants": "{0} хочет следить за вами как родитель", "linkedParent": "За вами следит: {0}", "onlyParent": "Отвязать может только родитель.", "gotTask": "{0} прислал(а) задачу: {1}", "famSumParent": "Привязано детей: {0}", "famSumChild": "Наблюдатель: {0}", "famSumReq": "У вас запросов: {0}", "famSumNone": "Не привязан", "e_rules": "Правила (Rules) в Firebase ещё не обновлены. Вставьте новые правила в Firestore.", "idWord": "ID", "navStats": "Статистика",
       "memberSince": "Участник с {0}",
       "secPersonal": "Личные данные",
       "fFirst": "Имя",
@@ -1727,7 +1888,7 @@ function taskRow(x) {
   const stCls = x.done ? "done" : overdue ? "fail" : lateNow ? "late" : x.date > t ? "plan" : "";
   const U = { uz: [" kun", "kuni"], en: ["d", "day of"], ru: [" дн.", "в день"] }[state.lang] || [" kun", "kuni"];
   const rem = (x.remind || []).map(o => o ? o + U[0] : U[1]).join(" · ");
-  const meta = [overdue ? fmtDate(x.date) : "", x.coins ? "+" + x.coins : ""].filter(Boolean).join(" / ");
+  const meta = [x.from ? "👪 " + x.from : "", overdue ? fmtDate(x.date) : "", x.coins ? "+" + x.coins : ""].filter(Boolean).join(" / ");
   row.innerHTML = `
     <span class="grip" aria-hidden="true" style="visibility:hidden">⋮⋮</span>
     <div class="info">
@@ -2033,7 +2194,7 @@ function applyLang() {
   document.querySelectorAll("[data-tp]").forEach(el => { el.placeholder = tr(el.dataset.tp); });
 }
 function render() {
-  renderToday(); renderProfile(); renderPR();
+  renderToday(); renderProfile(); renderPR(); renderSocial();
   applyTheme();
 }
 
@@ -2222,11 +2383,12 @@ function permText() {
 }
 function renderAccount() {
   paintAcct();
+  $("pScore").checked = state.privScore !== false; $("pRoutines").checked = !!state.privRoutines;
   paintAva($("accAva")); paintAva($("accAva2")); paintAva($("hudAva"));
   $("accName").textContent = fullName();
   const first = state.habits.reduce((m, h) => h.created < m ? h.created : m, today());
   const bits = [tr("memberSince", fmtShort(first)), "LVL " + levelOf(state.xp)];
-  if (state.phone) bits.push(state.phone);
+  if (state.friendCode) bits.push(tr("idWord") + ": " + state.friendCode);
   $("accSub").textContent = bits.join("  ·  ");
   $("accGoal").textContent = state.goal ? "“" + state.goal + "”" : "";
   $("photoDel").hidden = !state.photo;
@@ -2414,12 +2576,13 @@ function migrate() {
 
 // ---------- 19. Pages, clock, reminders, start ----------
 let firstShow = true;
-const PAGES = { today: "todayPage", pr: "prPage", stats: "statsPage", profile: "profilePage" };
+const PAGES = { today: "todayPage", pr: "prPage", friends: "friendsPage", stats: "statsPage", profile: "profilePage", family: "familyPage" };
 function showPage() {
   const h = location.hash.slice(1), p = PAGES[h] ? h : "today";
   const swap = () => {
     for (const k in PAGES) $(PAGES[k]).hidden = k !== p;
-    $("navToday").classList.toggle("on", p === "today"); $("navPr").classList.toggle("on", p === "pr"); $("navStats").classList.toggle("on", p === "stats"); $("navProfile").classList.toggle("on", p === "profile");
+    $("navToday").classList.toggle("on", p === "today"); $("navPr").classList.toggle("on", p === "pr"); $("navFriends").classList.toggle("on", p === "friends");
+    if (p === "friends" || p === "family") loadShares(true); $("navStats").classList.toggle("on", p === "stats"); $("navProfile").classList.toggle("on", p === "profile" || p === "family");
     lastName = null; render(); window.scrollTo(0, 0);
   };
   if (firstShow) { firstShow = false; swap(); return; }
@@ -2455,6 +2618,451 @@ document.addEventListener("visibilitychange", () => {
 });
 
 // ================================================================
+//  21. SOCIAL: friends, challenges, groups, parental control
+//  Shared data lives in separate Firestore collections; the Rules decide who can read what.
+// ================================================================
+const social = { fr: [], plP: [], plC: [], ch: [], gr: [], shares: {}, routines: {}, unsub: [] };
+const CODE_CH = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const newCode = (n = 6) => Array.from({ length: n }, () => CODE_CH[Math.floor(Math.random() * CODE_CH.length)]).join("");
+const col = n => cloud.db.collection(n);
+const myUid = () => cloud.user && cloud.user.uid;
+const pairId = (a, b) => a < b ? a + "_" + b : b + "_" + a;
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+function btn(cls, text, fn) { const b = el("button", "btn " + cls, text); b.type = "button"; b.onclick = fn; return b; }
+function socialErr(e) {
+  const c = (e && e.code) || "";
+  if (c.includes("permission-denied")) return tr("e_rules");
+  if (c.includes("unavailable") || c.includes("network")) return tr("e_net");
+  return (e && e.message) || String(e);
+}
+function copyText(t) {
+  if (!t) return;
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast(tr("copied"))).catch(() => prompt(tr("idWord"), t));
+}
+function personName(p) { return ((p.name || "") + " " + (p.lastName || "")).trim() || "?"; }
+
+// ---------- what others may see (written on every cloud save) ----------
+function pubCard() { return { uid: myUid(), name: state.name || "", lastName: state.lastName || "", emoji: state.emoji || "🙂" }; }
+function shareData() {
+  const d = today(), hs = state.habits.filter(h => scheduled(h, d)), ov = state.body ? overallRank() : null;
+  return { name: state.name || "", lastName: state.lastName || "", emoji: state.emoji || "🙂", code: state.friendCode || "",
+    coins: state.balance, level: levelOf(state.xp), streak: perfectStreak(), date: d,
+    todayDone: hs.filter(h => isDone(h.id, d)).length, todayTotal: hs.length,
+    rank: ov ? { lvl: ov.lvl, points: ov.points } : null,
+    privacy: { score: state.privScore !== false, routines: !!state.privRoutines }, updatedAt: Date.now() };
+}
+function shareRoutinesData() {
+  const d = today();
+  return { date: d, routines: state.habits.filter(h => scheduled(h, d)).sort((a, b) => (a.time || "99").localeCompare(b.time || "99"))
+    .map(h => ({ name: h.name, time: h.time || "", done: isDone(h.id, d), failed: isFailed(h.id, d) })) };
+}
+// Every account gets a short ID like R7K2QX that friends and parents type in
+async function ensureCode() {
+  if (!cloud.user) return;
+  if (state.friendCode) { try { await col("publicIds").doc(state.friendCode).set(pubCard()); } catch (e) {} return; }
+  for (let i = 0; i < 6; i++) {
+    const c = newCode(), ref = col("publicIds").doc(c);
+    try { const s = await ref.get(); if (s.exists) continue; await ref.set(pubCard()); state.friendCode = c; save(); render(); return; } catch (e) { return; }
+  }
+}
+async function findByCode(code) {
+  code = (code || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!code) return null;
+  const s = await col("publicIds").doc(code).get();
+  return s.exists ? Object.assign({ code }, s.data()) : null;
+}
+
+// ---------- live lists ----------
+function stopSocial() { social.unsub.forEach(f => { try { f(); } catch (e) {} }); social.unsub = []; }
+function startSocial() {
+  stopSocial(); const u = myUid(); if (!u) return;
+  const map = s => s.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  const onErr = e => console.warn("social", e);
+  social.unsub.push(col("friendships").where("users", "array-contains", u).onSnapshot(s => { social.fr = map(s); loadShares(true); render(); }, onErr));
+  social.unsub.push(col("parentLinks").where("parent", "==", u).onSnapshot(s => { social.plP = map(s); loadShares(true); render(); }, onErr));
+  social.unsub.push(col("parentLinks").where("child", "==", u).onSnapshot(s => { social.plC = map(s); render(); }, onErr));
+  social.unsub.push(col("challenges").where("members", "array-contains", u).onSnapshot(s => { social.ch = map(s); autoActivate(); render(); }, onErr));
+  social.unsub.push(col("groups").where("members", "array-contains", u).onSnapshot(s => { social.gr = map(s); render(); }, onErr));
+  social.unsub.push(cloud.db.collection("inbox").doc(u).collection("items").onSnapshot(s => { s.docs.forEach(processInbox); }, onErr));
+}
+let sharesAt = 0;
+async function loadShares(force) {
+  if (!cloud.user || (!force && Date.now() - sharesAt < 15000)) return;
+  sharesAt = Date.now(); const u = myUid();
+  const ids = new Set([
+    ...social.fr.filter(f => f.status === "accepted").map(f => f.users.find(x => x !== u)),
+    ...social.plP.filter(l => l.status === "active").map(l => l.child)]);
+  await Promise.all([...ids].map(async id => {
+    try { const s = await col("shares").doc(id).get(); social.shares[id] = s.exists ? s.data() : null; } catch (e) { social.shares[id] = null; }
+    try { const r = await col("shareRoutines").doc(id).get(); social.routines[id] = r.exists ? r.data() : null; } catch (e) { social.routines[id] = null; }
+  }));
+  render();
+}
+const isMyChild = uid => social.plP.some(l => l.child === uid && l.status === "active");
+
+// ---------- friends ----------
+$("copyCode").onclick = () => copyText(state.friendCode);
+$("frAdd").onclick = async () => {
+  const err = $("frErr"); err.textContent = "";
+  try {
+    const p = await findByCode($("frCode").value), u = myUid();
+    if (!p) { err.textContent = tr("idNotFound"); return; }
+    if (p.uid === u) { err.textContent = tr("selfId"); return; }
+    const id = pairId(u, p.uid);
+    if (social.fr.some(f => f.id === id)) { err.textContent = tr("alreadyFr"); return; }
+    await col("friendships").doc(id).set({ users: [u, p.uid].sort(), from: u, to: p.uid, status: "pending",
+      names: { [u]: fullName(), [p.uid]: personName(p) }, emojis: { [u]: state.emoji || "🙂", [p.uid]: p.emoji || "🙂" }, createdAt: Date.now() });
+    $("frCode").value = ""; toast(tr("reqSent"));
+  } catch (e) { err.textContent = socialErr(e); }
+};
+const acceptFriend = f => col("friendships").doc(f.id).update({ status: "accepted", acceptedAt: Date.now() }).catch(e => toast(socialErr(e)));
+const dropFriendship = f => col("friendships").doc(f.id).delete().catch(e => toast(socialErr(e)));
+function routinesList(rt) {
+  const ul = el("ul", "fRoutines");
+  rt.routines.forEach(r => ul.append(el("li", r.done ? "done" : r.failed ? "fail" : "", (r.done ? "✓ " : r.failed ? "✕ " : "○ ") + (r.time ? r.time + "  " : "") + r.name)));
+  return ul;
+}
+function statLine(sh) {
+  if (!sh) return "…";
+  return sh.coins + " " + tr("coins") + " · LVL " + sh.level + " · 🔥" + sh.streak + " · " + (sh.date === today() ? tr("todayX", sh.todayDone, sh.todayTotal) : tr("notToday2"));
+}
+function friendCard(uid, f) {
+  const sh = social.shares[uid], rt = social.routines[uid];
+  const showScore = sh && (sh.privacy ? sh.privacy.score !== false : true);
+  const showRoutines = rt && sh && sh.privacy && sh.privacy.routines;
+  const name = sh ? personName(sh) : (f.names && f.names[uid]) || "?";
+  const card = el("details", "fCard"), sum = el("summary");
+  sum.append(el("span", "fAva", (sh && sh.emoji) || (f.emojis && f.emojis[uid]) || "🙂"), el("span", "fName", name),
+    el("span", "fStats", showScore ? statLine(sh) : tr("hidden")));
+  card.append(sum);
+  const body = el("div", "fBody");
+  if (showRoutines && rt.date === today() && rt.routines.length) { body.append(el("p", "f", tr("theirRoutines")), routinesList(rt)); }
+  else body.append(el("p", "note", showRoutines ? tr("notToday2") : tr("routinesHidden")));
+  const row = el("div", "row");
+  row.append(btn("small", tr("newCh"), () => openChallenge([uid])),
+    btn("ghost warn small", tr("unfriend"), () => { if (confirm(tr("unfriendConfirm", name))) dropFriendship(f); }));
+  body.append(row); card.append(body);
+  return card;
+}
+function renderFriends() {
+  const on = !!cloud.user;
+  $("frNeedAcct").hidden = on; $("frMain").hidden = !on;
+  if (!on) return;
+  const u = myUid();
+  $("myCode").textContent = state.friendCode || "······";
+  const box = $("frRequests"); box.innerHTML = "";
+  const inc = social.fr.filter(f => f.status === "pending" && f.to === u), out = social.fr.filter(f => f.status === "pending" && f.from === u);
+  if (inc.length) {
+    box.append(el("p", "f", tr("incoming")));
+    inc.forEach(f => { const r = el("div", "reqRow"); r.append(el("span", "", ((f.emojis && f.emojis[f.from]) || "🙂") + " " + ((f.names && f.names[f.from]) || "?")), btn("small", "✓ " + tr("accept"), () => acceptFriend(f)), btn("ghost small", tr("reject"), () => dropFriendship(f))); box.append(r); });
+  }
+  if (out.length) {
+    box.append(el("p", "f", tr("outgoing")));
+    out.forEach(f => { const r = el("div", "reqRow"); r.append(el("span", "", ((f.emojis && f.emojis[f.to]) || "🙂") + " " + ((f.names && f.names[f.to]) || "?")), btn("ghost small", tr("cancelReq"), () => dropFriendship(f))); box.append(r); });
+  }
+  const list = $("frList"); list.innerHTML = "";
+  const acc = social.fr.filter(f => f.status === "accepted");
+  if (!acc.length) list.append(el("p", "empty", tr("noFriends")));
+  acc.forEach(f => list.append(friendCard(f.users.find(x => x !== u), f)));
+  renderChallenges(); renderGroups();
+}
+
+// ---------- challenges ----------
+let chDraft = [];
+function openChallenge(pre, groupId) {
+  if (!cloud.user) return;
+  chDraft = []; $("chName").value = ""; $("chDays").value = 7; $("chStart").value = today(); $("chErr").textContent = ""; $("chMissionIn").value = "";
+  paintMissions();
+  const fm = $("chFromMine"); fm.innerHTML = ""; fm.append(el("span", "note", tr("fromMine")));
+  state.habits.forEach(h => { const c = el("button", "chip small", h.name); c.type = "button"; c.onclick = () => addMission(h.name); fm.append(c); });
+  const fl = $("chFriends"); fl.innerHTML = ""; const u = myUid();
+  const acc = social.fr.filter(f => f.status === "accepted");
+  if (!acc.length) fl.append(el("p", "note", tr("noFriends")));
+  acc.forEach(f => {
+    const o = f.users.find(x => x !== u), lab = el("label", "pick"), cb = document.createElement("input");
+    cb.type = "checkbox"; cb.value = o; cb.checked = (pre || []).includes(o);
+    lab.append(cb, el("span", "", ((f.emojis && f.emojis[o]) || "🙂") + " " + ((f.names && f.names[o]) || "?"))); fl.append(lab);
+  });
+  const gs = $("chGroupSel"); gs.innerHTML = ""; gs.add(new Option("— " + tr("noneGroup") + " —", ""));
+  social.gr.forEach(g => gs.add(new Option(g.name + " (" + g.members.length + ")", g.id)));
+  gs.value = groupId || "";
+  $("chDlg").showModal();
+}
+function addMission(n) { n = (n || "").trim(); if (!n || chDraft.some(m => m.toLowerCase() === n.toLowerCase())) return; chDraft.push(n); paintMissions(); }
+function paintMissions() {
+  const l = $("chMissionList"); l.innerHTML = "";
+  chDraft.forEach((m, i) => { const r = el("div", "mRow"); r.append(el("span", "", (i + 1) + ". " + m)); const x = el("button", "ib", "✕"); x.type = "button"; x.onclick = () => { chDraft.splice(i, 1); paintMissions(); }; r.append(x); l.append(r); });
+}
+$("chMissionAdd").onclick = () => { addMission($("chMissionIn").value); $("chMissionIn").value = ""; $("chMissionIn").focus(); };
+$("chMissionIn").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("chMissionAdd").onclick(); } });
+$("chCancel").onclick = () => $("chDlg").close();
+$("chNew").onclick = () => openChallenge([]);
+function nameOf(uid, g) {
+  const f = social.fr.find(x => x.users.includes(uid));
+  if (f && f.names && f.names[uid]) return f.names[uid];
+  if (g && g.names && g.names[uid]) return g.names[uid];
+  return social.shares[uid] ? personName(social.shares[uid]) : "?";
+}
+$("chForm").addEventListener("submit", async e => {
+  e.preventDefault(); const err = $("chErr"); err.textContent = "";
+  if ($("chMissionIn").value.trim()) { addMission($("chMissionIn").value); $("chMissionIn").value = ""; }
+  const title = $("chName").value.trim();
+  if (!title || !chDraft.length) { err.textContent = tr("chNeedName"); return; }
+  const u = myUid(), picked = [...$("chFriends").querySelectorAll("input:checked")].map(c => c.value);
+  const gid = $("chGroupSel").value, g = social.gr.find(x => x.id === gid);
+  const members = [...new Set([u, ...picked, ...(g ? g.members : [])])];
+  if (members.length < 2) { err.textContent = tr("chNeedWho"); return; }
+  const names = {}; members.forEach(m => { names[m] = m === u ? fullName() : nameOf(m, g); });
+  try {
+    await col("challenges").add({ creator: u, members, names, title, days: Math.max(1, Math.min(60, Math.round(+$("chDays").value) || 7)),
+      start: $("chStart").value || today(), missions: chDraft.map((n, i) => ({ id: "m" + Date.now().toString(36) + i, name: n })),
+      status: "proposed", responses: {}, progress: {}, groupId: gid || "", version: 1, createdAt: Date.now() });
+    $("chDlg").close(); toast(tr("chSent"));
+  } catch (er) { err.textContent = socialErr(er); }
+});
+function chState(c) { if (c.status !== "active") return c.status; return today() > addDays(c.start, c.days - 1) ? "done" : "active"; }
+function autoActivate() {
+  for (const c of social.ch) {
+    if (c.status !== "proposed") continue;
+    const others = c.members.filter(m => m !== c.creator);
+    if (others.length && others.every(m => c.responses && c.responses[m] && c.responses[m].status === "accepted"))
+      col("challenges").doc(c.id).update({ status: "active" }).catch(() => {});
+  }
+}
+async function respond(c, status, note, sugg) {
+  const list = (sugg || "").split(",").map(x => x.trim()).filter(Boolean);
+  try { await col("challenges").doc(c.id).update({ ["responses." + myUid()]: { status, note: (note || "").trim(), sugg: list, at: Date.now() } }); toast(tr("answerSent")); }
+  catch (e) { toast(socialErr(e)); }
+}
+async function repropose(c, missions) {
+  try { await col("challenges").doc(c.id).update({ missions, responses: {}, version: (c.version || 1) + 1 }); toast(tr("chSent")); }
+  catch (e) { toast(socialErr(e)); }
+}
+function applySuggestions(c) {
+  const have = c.missions.map(m => m.name.toLowerCase()), add = [];
+  Object.values(c.responses || {}).forEach(r => (r.sugg || []).forEach(n => { if (!have.includes(n.toLowerCase()) && !add.some(a => a.toLowerCase() === n.toLowerCase())) add.push(n); }));
+  repropose(c, [...c.missions, ...add.map((n, i) => ({ id: "m" + Date.now().toString(36) + "s" + i, name: n }))]);
+}
+async function toggleMission(c, mid, on) {
+  const u = myUid(), t = today(), cur = new Set((c.progress && c.progress[u] && c.progress[u][t]) || []);
+  on ? cur.add(mid) : cur.delete(mid);
+  try { await col("challenges").doc(c.id).update({ ["progress." + u + "." + t]: [...cur] }); on ? SFX.tick() : SFX.untick(); }
+  catch (e) { toast(socialErr(e)); }
+}
+function chCard(c) {
+  const u = myUid(), st = chState(c), t = today(), end = addDays(c.start, c.days - 1);
+  const who = m => m === u ? tr("you") : ((c.names && c.names[m]) || "?");
+  const card = el("div", "chCard st-" + st), head = el("div", "liftHead");
+  head.append(el("h3", "", c.title), el("span", "st " + (st === "active" ? "done" : st === "done" ? "plan" : "late"), tr({ proposed: "stProposed", active: "stActive", done: "stDoneCh" }[st] || "stProposed")));
+  card.append(head, el("p", "note", c.members.map(who).join(", ") + " · " + c.days + " " + tr("daysWord") + " · " + fmtShort(c.start)));
+  if (st === "active" && t >= c.start && t <= end) {
+    card.append(el("p", "f", tr("todayMissions")));
+    const mine = (c.progress && c.progress[u] && c.progress[u][t]) || [];
+    c.missions.forEach(m => {
+      const lab = el("label", "pick tall"), cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = mine.includes(m.id); cb.onchange = () => toggleMission(c, m.id, cb.checked);
+      lab.append(cb, el("span", "", m.name)); card.append(lab);
+    });
+    card.append(el("p", "note", tr("daysLeft", daysBetween(t, end) + 1)));
+  } else {
+    const ul = el("ul", "mList"); c.missions.forEach(m => ul.append(el("li", "", m.name))); card.append(ul);
+    if (st === "active" && t < c.start) card.append(el("p", "note", tr("startsIn", daysBetween(t, c.start))));
+  }
+  if (st === "active" || st === "done") {
+    const max = c.missions.length * c.days;
+    const scores = c.members.map(m => ({ m, n: Object.values((c.progress && c.progress[m]) || {}).reduce((a, arr) => a + arr.length, 0) })).sort((a, b) => b.n - a.n);
+    const lb = el("div", "lb"); lb.append(el("p", "f", tr("leaderboard")));
+    scores.forEach((s, i) => { const r = el("div", "lbRow"); r.append(el("span", "", (i === 0 && s.n > 0 ? "🏆 " : "") + who(s.m)), el("span", "mono", s.n + "/" + max)); lb.append(r); });
+    if (st === "done" && scores[0] && scores[0].n > 0) lb.append(el("p", "okMsg", tr("winner", who(scores[0].m))));
+    card.append(lb);
+  }
+  if (st === "proposed") {
+    const resp = c.responses || {}, others = c.members.filter(m => m !== c.creator), ans = el("div", "answers");
+    others.forEach(m => {
+      const r = resp[m], line = el("div", "ansRow");
+      line.append(el("b", "", who(m) + ": "), el("span", r ? "a-" + r.status : "muted", r ? tr({ accepted: "ansAccepted", rejected: "ansRejected", changes: "ansChanges" }[r.status]) : tr("waiting")));
+      if (r && r.note) line.append(el("p", "note", "“" + r.note + "”"));
+      if (r && r.sugg && r.sugg.length) line.append(el("p", "note", "+ " + r.sugg.join(", ")));
+      ans.append(line);
+    });
+    card.append(ans);
+    if (u !== c.creator) {
+      const mine = resp[u], form = el("div", "answerForm");
+      const note = document.createElement("textarea"); note.placeholder = tr("notePh"); note.value = (mine && mine.note) || "";
+      const sugg = document.createElement("input"); sugg.placeholder = tr("suggestMissions"); sugg.value = ((mine && mine.sugg) || []).join(", ");
+      const row = el("div", "row");
+      row.append(btn("small", "✓ " + tr("acceptCh"), () => respond(c, "accepted", note.value, sugg.value)),
+        btn("ghost small", tr("suggestCh"), () => respond(c, "changes", note.value, sugg.value)),
+        btn("ghost warn small", tr("rejectCh"), () => respond(c, "rejected", note.value, sugg.value)));
+      form.append(note, sugg, row); card.append(form);
+    } else {
+      const row = el("div", "row");
+      if (others.some(m => resp[m] && resp[m].sugg && resp[m].sugg.length)) row.append(btn("small", tr("applySugg"), () => applySuggestions(c)));
+      if (Object.keys(resp).length) row.append(btn("ghost small", tr("repropose"), () => repropose(c, c.missions)));
+      row.append(btn("ghost warn small", tr("deleteCh"), () => { if (confirm(tr("delChConfirm"))) col("challenges").doc(c.id).delete().catch(e => toast(socialErr(e))); }));
+      card.append(row);
+    }
+  } else if (u === c.creator) {
+    const row = el("div", "row"); row.append(btn("ghost warn small", tr("deleteCh"), () => { if (confirm(tr("delChConfirm"))) col("challenges").doc(c.id).delete().catch(e => toast(socialErr(e))); })); card.append(row);
+  }
+  return card;
+}
+function renderChallenges() {
+  const list = $("chList"); list.innerHTML = "";
+  if (!social.ch.length) { list.append(el("p", "empty", tr("noCh"))); return; }
+  [...social.ch].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(c => list.append(chCard(c)));
+}
+
+// ---------- groups (need 50+ coins to create) ----------
+function renderGroups() {
+  const can = state.balance >= 50, u = myUid();
+  $("grHint").textContent = can ? "" : tr("grNeedCoins", state.balance);
+  $("grNew").disabled = !can;
+  const list = $("grList"); list.innerHTML = "";
+  if (!social.gr.length) list.append(el("p", "empty", tr("noGroups")));
+  social.gr.forEach(g => {
+    const d = el("details", "fCard"), s = el("summary");
+    s.append(el("span", "fAva", "👥"), el("span", "fName", g.name), el("span", "fStats", tr("members", g.members.length) + " · " + tr("joinCode") + ": " + g.id));
+    d.append(s);
+    const body = el("div", "fBody"), ul = el("ul", "fRoutines");
+    g.members.forEach(m => ul.append(el("li", "", (m === g.owner ? "👑 " : "") + (m === u ? tr("you") : ((g.names && g.names[m]) || "?")))));
+    body.append(ul, el("p", "note", tr("grCodeHint") + " " + g.id));
+    const row = el("div", "row");
+    row.append(btn("small", tr("newCh"), () => openChallenge([], g.id)), btn("ghost small", tr("copy"), () => copyText(g.id)));
+    if (g.owner === u) row.append(btn("ghost warn small", tr("delGroup"), () => { if (confirm(tr("delGroup") + "?")) col("groups").doc(g.id).delete().catch(e => toast(socialErr(e))); }));
+    else row.append(btn("ghost warn small", tr("leave"), () => { if (confirm(tr("leaveConfirm"))) col("groups").doc(g.id).update({ members: g.members.filter(m => m !== u) }).catch(e => toast(socialErr(e))); }));
+    body.append(row); d.append(body); list.append(d);
+  });
+}
+$("grNew").onclick = () => { $("grCreateBox").hidden = !$("grCreateBox").hidden; if (!$("grCreateBox").hidden) $("grName").focus(); };
+$("grCreate").onclick = async () => {
+  const err = $("grErr"); err.textContent = "";
+  if (state.balance < 50) { err.textContent = tr("grNeedCoins", state.balance); return; }
+  const name = $("grName").value.trim(); if (!name) { $("grName").focus(); return; }
+  try {
+    let id = newCode(); for (let i = 0; i < 5; i++) { const s = await col("groups").doc(id).get(); if (!s.exists) break; id = newCode(); }
+    const u = myUid();
+    await col("groups").doc(id).set({ owner: u, name, members: [u], names: { [u]: fullName() }, createdAt: Date.now() });
+    $("grName").value = ""; $("grCreateBox").hidden = true; toast(tr("grCreated", id));
+  } catch (e) { err.textContent = socialErr(e); }
+};
+$("grJoin").onclick = async () => {
+  const err = $("grErr"); err.textContent = "";
+  const code = $("grJoinCode").value.trim().toUpperCase().replace(/[^A-Z0-9]/g, ""); if (!code) return;
+  try {
+    const ref = col("groups").doc(code), s = await ref.get();
+    if (!s.exists) { err.textContent = tr("grNotFound"); return; }
+    const g = s.data(), u = myUid();
+    if (g.members.includes(u)) { toast(tr("joined")); return; }
+    await ref.update({ members: [...g.members, u], ["names." + u]: fullName() });
+    $("grJoinCode").value = ""; toast(tr("joined"));
+  } catch (e) { err.textContent = socialErr(e); }
+};
+
+// ---------- parental control ----------
+[...$("famRole").children].forEach(b => b.onclick = () => { if (b.disabled) return; state.familyRole = b.dataset.v; save(); render(); });
+$("famSend").onclick = async () => {
+  const err = $("famErr"), ok = $("famOk"); err.textContent = ""; ok.textContent = "";
+  try {
+    const p = await findByCode($("famChildCode").value), u = myUid();
+    if (!p) { err.textContent = tr("idNotFound"); return; }
+    if (p.uid === u) { err.textContent = tr("selfId"); return; }
+    const id = u + "_" + p.uid;
+    if (social.plP.some(l => l.id === id)) { err.textContent = tr("alreadyFr2"); return; }
+    await col("parentLinks").doc(id).set({ parent: u, child: p.uid, status: "pending", parentName: fullName(), parentCode: state.friendCode || "",
+      childName: personName(p), childEmoji: p.emoji || "🙂", childCode: p.code, createdAt: Date.now() });
+    $("famChildCode").value = ""; ok.textContent = tr("parReqSent");
+  } catch (e) { err.textContent = socialErr(e); }
+};
+function renderFamily() {
+  const on = !!cloud.user;
+  $("famNeedAcct").hidden = on; $("famMain").hidden = !on;
+  // summary on the Profile page
+  const actC = social.plC.filter(l => l.status === "active"), pendC = social.plC.filter(l => l.status === "pending");
+  $("famSummary").textContent = !on ? tr("needAccount") : social.plP.length ? tr("famSumParent", social.plP.filter(l => l.status === "active").length)
+    : actC.length ? tr("famSumChild", actC.map(l => l.parentName).join(", ")) : pendC.length ? tr("famSumReq", pendC.length) : tr("famSumNone");
+  if (!on) return;
+  const role = state.familyRole || (pendC.length || actC.length ? "child" : "");
+  const locked = social.plP.length > 0 || actC.length > 0;
+  [...$("famRole").children].forEach(b => { b.setAttribute("aria-pressed", b.dataset.v === role); b.disabled = locked && b.dataset.v !== role; });
+  $("famRoleNote").textContent = locked ? tr("roleLocked") : "";
+  $("famParent").hidden = role !== "parent"; $("famChild").hidden = role !== "child";
+  if (role === "parent") {
+    const box = $("famChildren"); box.innerHTML = "";
+    if (!social.plP.length) box.append(el("p", "empty", tr("noChildren")));
+    social.plP.forEach(l => {
+      const d = el("details", "fCard"), s = el("summary"), sh = social.shares[l.child];
+      s.append(el("span", "fAva", l.childEmoji || "🙂"), el("span", "fName", l.childName || "?"), el("span", "fStats", l.status !== "active" ? tr("pendingAcc") : statLine(sh)));
+      d.append(s);
+      const body = el("div", "fBody");
+      if (l.status === "active") {
+        const rt = social.routines[l.child];
+        if (rt && rt.date === today() && rt.routines.length) body.append(el("p", "f", tr("theirRoutines")), routinesList(rt));
+        else body.append(el("p", "note", tr("notToday2")));
+        const tIn = document.createElement("input"); tIn.placeholder = tr("taskNamePh");
+        const dIn = document.createElement("input"); dIn.type = "date"; dIn.value = today();
+        const row = el("div", "inline");
+        row.append(tIn, dIn, btn("small", tr("sendTask"), async () => {
+          const n = tIn.value.trim(); if (!n) { tIn.focus(); return; }
+          try { await cloud.db.collection("inbox").doc(l.child).collection("items").add({ from: myUid(), fromName: fullName(), type: "task", name: n, date: dIn.value || today(), at: Date.now() }); tIn.value = ""; toast(tr("taskSent")); }
+          catch (e) { toast(socialErr(e)); }
+        }));
+        body.append(el("p", "f", tr("sendTask")), row);
+      }
+      const r2 = el("div", "row");
+      r2.append(btn("ghost warn small", l.status === "active" ? tr("unlink") : tr("cancelReq"), () => { if (confirm(tr("unlinkConfirm", l.childName || ""))) col("parentLinks").doc(l.id).delete().catch(e => toast(socialErr(e))); }));
+      body.append(r2); d.append(body); box.append(d);
+    });
+  }
+  if (role === "child") {
+    const box = $("famRequests"); box.innerHTML = "";
+    actC.forEach(l => box.append(el("div", "reqRow", "👪 " + tr("linkedParent", l.parentName || "?"))));
+    if (actC.length) box.append(el("p", "note", tr("onlyParent")));
+    if (!pendC.length && !actC.length) box.append(el("p", "empty", tr("noRequests")));
+    pendC.forEach(l => {
+      const c = el("div", "reqCard");
+      c.append(el("b", "", tr("parentWants", l.parentName || "?")), el("p", "note", tr("idWord") + ": " + (l.parentCode || "—") + " · " + fmtShort(dayStr(new Date(l.createdAt || Date.now())))));
+      const row = el("div", "row");
+      row.append(btn("small", "✓ " + tr("accept"), () => col("parentLinks").doc(l.id).update({ status: "active", acceptedAt: Date.now() }).then(() => { state.familyRole = "child"; save(); }).catch(e => toast(socialErr(e)))),
+        btn("ghost warn small", tr("reject"), () => col("parentLinks").doc(l.id).delete().catch(e => toast(socialErr(e)))));
+      c.append(row); box.append(c);
+    });
+  }
+}
+// tasks a parent sends arrive in the child's list
+async function processInbox(d) {
+  const x = d.data();
+  if (x && x.type === "task" && !state.tasks.some(t => t.inboxId === d.id)) {
+    state.tasks.push({ id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), inboxId: d.id, name: x.name, date: x.date || today(),
+      time: "", coins: 1, remind: [0], done: false, created: today(), from: x.fromName || "" });
+    save(); render(); toast(tr("gotTask", x.fromName || "", x.name));
+  }
+  try { await d.ref.delete(); } catch (e) {}
+}
+function renderSocial() { renderFriends(); renderFamily(); }
+
+// ---------- required profile details after sign-in ----------
+function needsOnboarding() { return !!cloud.user && !(state.name && state.lastName && state.phone && state.birth); }
+function showOnboarding() {
+  $("obFirst").value = state.name || ""; $("obLast").value = state.lastName || ""; $("obPhone").value = state.phone || ""; $("obBirth").value = state.birth || "";
+  $("obBirth").max = today(); $("obErr").textContent = "";
+  $("onboard").hidden = false; document.body.classList.add("authing");
+}
+$("obPhone").oninput = () => { $("obPhone").value = fmtPhone($("obPhone").value); };
+$("obForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = $("obFirst").value.trim(), l = $("obLast").value.trim(), ph = $("obPhone").value, b = $("obBirth").value;
+  if (!f || !l || !ph || !b) { $("obErr").textContent = tr("obNeed"); return; }
+  if (ph.replace(/\D/g, "").length !== 12) { $("obErr").textContent = tr("phoneBad"); return; }
+  if (!(b >= "1900-01-01" && b <= today())) { $("obErr").textContent = tr("birthBad"); return; }
+  state.name = f; state.lastName = l; state.phone = ph; state.birth = b;
+  $("onboard").hidden = true; document.body.classList.remove("authing");
+  lastName = null; save(); render(); ensureCode();
+});
+$("pScore").onchange = () => { state.privScore = $("pScore").checked; save(); };
+$("pRoutines").onchange = () => { state.privRoutines = $("pRoutines").checked; save(); };
+
+// ================================================================
 //  20. CLOUD: login + database (Firebase)
 //  Paste your own config from the Firebase console below.
 //  While it still says PASTE_..., the app works offline on this device only.
@@ -2486,7 +3094,11 @@ function scheduleCloud() {
 function pushCloud() {
   if (!cloud.user) return;
   clearTimeout(cloud.timer);
-  return userDoc().set({ data: JSON.stringify(state), updatedAt: Date.now(), client: CLIENT_ID })
+  const uid = cloud.user.uid, b = cloud.db.batch();
+  b.set(userDoc(), { data: JSON.stringify(state), updatedAt: Date.now(), client: CLIENT_ID });
+  b.set(col("shares").doc(uid), shareData());
+  b.set(col("shareRoutines").doc(uid), shareRoutinesData());
+  return b.commit()
     .then(() => { cloud.pending = false; setSync("ok"); })
     .catch(() => setSync(navigator.onLine ? "err" : "off"));
 }
@@ -2539,7 +3151,7 @@ function authError(e) {
   const map = { "auth/invalid-email": "e_email", "auth/user-not-found": "e_cred", "auth/wrong-password": "e_cred",
     "auth/invalid-credential": "e_cred", "auth/invalid-login-credentials": "e_cred", "auth/email-already-in-use": "e_inuse",
     "auth/weak-password": "e_weak", "auth/operation-not-supported-in-this-environment": "e_file", "auth/unauthorized-domain": "e_domain",
-    "auth/network-request-failed": "e_net", "auth/too-many-requests": "e_many", "auth/operation-not-allowed": "e_provider" };
+    "auth/network-request-failed": "e_net", "auth/web-storage-unsupported": "e_storage", "auth/popup-blocked": "e_popup", "auth/too-many-requests": "e_many", "auth/operation-not-allowed": "e_provider" };
   if (c === "auth/popup-closed-by-user" || c === "auth/cancelled-popup-request") return;
   $("authErr").textContent = map[c] ? tr(map[c]) : (e.message || c);
 }
@@ -2559,19 +3171,31 @@ function paintAuth() {
 function showAuth(loading) {
   $("authLocal").hidden = true;          // with Firebase set up, everyone signs in
   $("fileNote").hidden = location.protocol !== "file:";
+  $("inAppNote").hidden = !inAppBrowser();
   $("auth").hidden = false; document.body.classList.add("authing");
   $("authLoading").hidden = !loading; $("authMain").hidden = !!loading;
   $("authErr").textContent = ""; $("authOk").textContent = ""; paintAuth();
 }
 function hideAuth() { $("auth").hidden = true; document.body.classList.remove("authing"); }
 $("authToggle").onclick = () => { authMode = authMode === "in" ? "up" : "in"; $("authErr").textContent = ""; paintAuth(); };
+// Google refuses sign-in inside apps' built-in browsers (Telegram, Instagram, Facebook...)
+function inAppBrowser() {
+  const ua = navigator.userAgent || "";
+  if (/Instagram|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|Telegram|TikTok|musical_ly|Snapchat/i.test(ua)) return true;
+  if (/Android/.test(ua) && /; wv\)/.test(ua)) return true;                         // Android WebView
+  if (/iPhone|iPad|iPod/.test(ua) && !/Safari\//.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return true;  // iOS WebView
+  return false;
+}
 $("gBtn").onclick = async () => {
   $("authErr").textContent = "";
+  if (inAppBrowser()) { $("authErr").textContent = tr("e_inapp"); return; }
   const prov = new firebase.auth.GoogleAuthProvider();
+  prov.setCustomParameters({ prompt: "select_account" });
   try { await cloud.auth.signInWithPopup(prov); }
   catch (e) {
-    if (e.code === "auth/popup-blocked") { try { await cloud.auth.signInWithRedirect(prov); } catch (e2) { authError(e2); } }
-    else authError(e);
+    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment" && location.protocol !== "file:") {
+      try { await cloud.auth.signInWithRedirect(prov); } catch (e2) { authError(e2); }
+    } else authError(e);
   }
 };
 $("authForm").addEventListener("submit", async e => {
@@ -2601,6 +3225,7 @@ async function signOutNow() {
   if (!cloud.user || !confirm(tr("signOutConfirm"))) return;
   try { if (cloud.pending) await pushCloud(); } catch (e) {}
   if (cloud.unsub) cloud.unsub();
+  stopSocial();
   try { localStorage.removeItem(KEY + ":last"); localStorage.removeItem(storeKey); } catch (e) {}
   await cloud.auth.signOut();
   location.reload();
@@ -2646,12 +3271,15 @@ function boot() {
   }
   firebase.initializeApp(FIREBASE_CONFIG);
   cloud.auth = firebase.auth(); cloud.db = firebase.firestore();
+  cloud.auth.getRedirectResult().catch(e => { showAuth(false); authError(e); });
   showAuth(true);
   cloud.auth.onAuthStateChanged(async user => {
     if (user) {
       cloud.user = user; showAuth(true);
       await loadCloud(user);
       hideAuth(); startApp();
+      if (needsOnboarding()) showOnboarding(); else ensureCode();
+      startSocial();
     } else {
       cloud.user = null;
       if (!localMode) showAuth(false);
